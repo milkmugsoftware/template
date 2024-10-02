@@ -44,6 +44,7 @@ export const shadTheme = (mode: 'light' | 'dark') => {
       fontSize: 14,
       htmlFontSize: 18,
       fontFamily: [
+        'Anaheim',
         'Noto Sans',
         '"Source Sans Pro"',
         '-apple-system',
@@ -132,6 +133,11 @@ export const shadTheme = (mode: 'light' | 'dark') => {
           root: {
             textTransform: 'none',
             boxShadow: 'none',
+            borderRadius: 0,
+            border: '1px solid black',
+          },
+          outlined: {
+            borderWidth: '1px',
           },
           sizeSmall: {
             padding: '2px 12px',
@@ -164,7 +170,8 @@ export const shadTheme = (mode: 'light' | 'dark') => {
       MuiCard: {
         styleOverrides: {
           root: {
-            backgroundImage: 'none',
+            border: '1px solid black',
+            borderRadius: 0,
           },
         },
       },
@@ -173,7 +180,8 @@ export const shadTheme = (mode: 'light' | 'dark') => {
           root: {
             backgroundImage: 'none',
             backgroundColor: isDarkMode ? '#090909' : common['white'],
-            border: `1px solid ${isDarkMode ? grey[800] : grey[300]}`,
+            border: '1px solid black',
+            borderRadius: 0,
           },
         },
       },
