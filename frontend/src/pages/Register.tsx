@@ -25,7 +25,6 @@ const Register = () => {
     try {
       const response = await axios.post('/api/auth/register', { email, username, password });
       console.log('Registration successful:', response.data);
-      // Handle successful registration (e.g., store token, redirect)
     } catch (err) {
       setError('Registration failed. Please try again.');
       console.error('Registration error:', err);

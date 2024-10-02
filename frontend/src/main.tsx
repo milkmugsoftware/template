@@ -6,7 +6,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { getThemeByName } from './theme.ts'
 import CssBaseline from '@mui/material/CssBaseline'
 
-const theme = getThemeByName('shadTheme', 'dark') // You can change 'dark' to 'light' if needed
+const theme = getThemeByName('shadTheme', 'light')
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
