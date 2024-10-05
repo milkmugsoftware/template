@@ -2,9 +2,9 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches: [ main ]
+    branches: [ zanalyx ]
   pull_request:
-    branches: [ main ]
+    branches: [ zanalyx ]
 
 jobs:
   build-and-push:
