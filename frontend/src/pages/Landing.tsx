@@ -124,7 +124,7 @@ const Landing = () => {
               },
             }}
           >
-            Empowering traders with advanced crypto whale tracking and analytics
+            Empowering traders teste with advanced crypto whale tracking and analytics
           </Typography>
           <HeroContent>
                 <Typography

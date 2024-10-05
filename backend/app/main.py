@@ -12,7 +12,7 @@ from utils.whale_alert import connect_whale_alert
 async def lifespan(app: FastAPI):
     # Startup: initialize the database and start Whale Alert connection
     init_db()
-    # asyncio.create_task(connect_whale_alert())
+    asyncio.create_task(connect_whale_alert())
     yield
     # Shutdown: close the database connection
     close_db()
