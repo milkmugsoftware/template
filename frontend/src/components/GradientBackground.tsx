@@ -3,18 +3,8 @@ import { motion } from 'framer-motion';
 import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-const BackgroundElement = ({  type }: { initialPosition: { x: number, y: number }, type: string, gradient: string }) => {
-  let shape;
-  switch(type) {
-    case 'circle':
-      shape = 'rounded-full';
-      break;
-    case 'fluid':
-      shape = `rounded-[${Math.floor(Math.random() * 50)}%_${Math.floor(Math.random() * 50)}%_${Math.floor(Math.random() * 50)}%_${Math.floor(Math.random() * 50)}]`;
-      break;
-    default:
-      shape = 'rounded-full';
-  }
+const BackgroundElement = () => {
+
   const gradients = [
     'linear-gradient(to bottom right, #FF6B6B, #4ECDC4)',
     'linear-gradient(to bottom right, #A3A1FF, #3A3897)',
@@ -69,9 +59,9 @@ const GradientBackground = () => {
     return (
       <>
         {[...Array(1)].map((_, i) => (
-          <BackgroundElement 
+          <BackgroundElement
             key={`element-${i}`}
-            //@ts-ignore
+            //@ts-expect-error - TS doesn't know about the initialPosition prop
             size={Math.random() * 200 + 50}
             initialPosition={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
             type={['circle', 'fluid'][Math.floor(Math.random() * 2)]}

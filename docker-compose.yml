@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SOFTWARE_NAME=Zanalyx
+
+      - MONGODB_URL=mongodb://zanalyx:zanalyx_development@ovosimpatico.com:27022
+      - JWT_SECRET=your_jwt_secret
+
+      - MERCADO_PAGO_ACCESS_TOKEN=APP_USR-5622478806324166-090413-6e322b02ccec823d6d242dfeccaacff0-1622076819
+      - MERCADO_PAGO_PUBLIC_KEY=APP_USR-21b93b38-d5e2-463d-9228-0d2ae0d85388
+      - STATEMENT_DESCRIPTOR=Zanalyx
+
+      - PRICE=1
+
+      - SMTP_SERVER=mail.smtp2go.com
+      - SMTP_PORT=2525
+      - SMTP_USERNAME=Podini
+      - SMTP_PASSWORD=rNoBnFkn0JmGlgu8
+      - FROM_EMAIL=noreply@podini.app
+
+      - WHALE_ALERT_API_KEY=Acrf1iuc9PLnymwZiSsX6Vp8K0wW5iNR
+
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend

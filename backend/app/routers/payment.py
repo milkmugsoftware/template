@@ -2,18 +2,22 @@ import re
 from datetime import datetime
 from math import ceil
 from typing import Optional
+import os
 
 import mercadopago
 from bson import ObjectId
-from config import MERCADO_PAGO_ACCESS_TOKEN, CREDIT_VALUE
+from config import MERCADO_PAGO_ACCESS_TOKEN, SOFTWARE_NAME
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.payment import CardInfo, PaginatedPaymentResponse, PaymentCreate, PaymentResponse, PixPaymentCreate, PixPaymentResponse
-from models.user import UserAddCredits
+from models.payment import CardInfo, PaginatedPaymentResponse, PaymentCreate, PaymentResponse
 from utils.security import get_current_user
 
 router = APIRouter()
 sdk = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
+
+# Get environment variables
+PRICE = float(os.getenv("PRICE", "1.0"))
+STATEMENT_DESCRIPTOR = os.getenv("STATEMENT_DESCRIPTOR", "MYSTORE")[:13]  # Limit to 13 characters
 
 def get_payment_method_id(card_number: str):
     payment_methods = sdk.payment_methods().list_all()
@@ -33,128 +37,106 @@ def get_payment_method_id(card_number: str):
     raise HTTPException(status_code=400, detail="Unable to determine payment method")
 
 @router.post("/create_payment", response_model=PaymentResponse)
-async def create_payment(payment: PaymentCreate, card: Optional[CardInfo] = None, current_user: str = Depends(get_current_user)):
+async def create_payment(payment: PaymentCreate, card: CardInfo, current_user: str = Depends(get_current_user)):
     db = get_db()
     user = db.users.find_one({"email": current_user})
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Create a new payment document in the database
+    db_payment = {
+        "user_id": user["_id"],
+        "amount": PRICE,
+        "description": f"{SOFTWARE_NAME} Pro Subscription",
+        "payment_method": "credit_card",
+        "payment_date": datetime.utcnow(),
+        "payer_first_name": payment.payer_first_name,
+        "payer_last_name": payment.payer_last_name,
+        "status": "pending"
+    }
+    insert_result = db.payments.insert_one(db_payment)
+    payment_id = str(insert_result.inserted_id)
+
     payment_data = {
-        "transaction_amount": float(payment.amount),
-        "description": payment.description,
-        "payment_method_id": payment.payment_method,
+        "transaction_amount": PRICE,
+        "description": f"{SOFTWARE_NAME} Pro Subscription",
+        "payment_method_id": "credit_card",
+        "installments": 1,
         "payer": {
-            "email": user["email"]
+            "email": user["email"],
+            "first_name": payment.payer_first_name,  # Correctly passing first_name
+            "last_name": payment.payer_last_name     # Correctly passing last_name
+        },
+        "additional_info": {
+            "items": [
+                {
+                    "id": "1",
+                    "title": f"{SOFTWARE_NAME} Pro",
+                    "description": f"{SOFTWARE_NAME} Pro Subscription",
+                    "category_id": "1",
+                    "quantity": 1,
+                    "unit_price": PRICE
+                }
+            ]
+        },
+        "external_reference": payment_id,
+        "statement_descriptor": STATEMENT_DESCRIPTOR
+    }
+
+    # Create card token
+    card_data = {
+        "card_number": card.card_number,
+        "expiration_month": card.expiration_month,
+        "expiration_year": card.expiration_year,
+        "security_code": card.security_code,
+        "cardholder": {
+            "name": card.cardholder_name
         }
     }
 
-    if payment.payment_method == "credit_card":
-        if not card:
-            raise HTTPException(status_code=400, detail="Card info is required for credit card payments")
+    card_token_result = sdk.card_token().create(card_data)
 
-        # Create card token
-        card_data = {
-            "card_number": card.card_number,
-            "expiration_month": card.expiration_month,
-            "expiration_year": card.expiration_year,
-            "security_code": card.security_code,
-            "cardholder": {
-                "name": card.cardholder_name
-            }
-        }
+    if card_token_result["status"] != 201:
+        # store card_token_result in a log file
+        with open("card_token_error.log", "a") as f:
+            f.write(f"{card_token_result}\n")
 
-        card_token_result = sdk.card_token().create(card_data)
+        raise HTTPException(status_code=400, detail="Failed to create card token")
 
-        if card_token_result["status"] != 201:
-            raise HTTPException(status_code=400, detail="Failed to create card token")
-
-        card_token = card_token_result["response"]["id"]
-        payment_data["token"] = card_token
-        payment_data["installments"] = payment.installments
-        payment_data["payment_method_id"] = get_payment_method_id(card.card_number)
-
-    elif payment.payment_method == "pix":
-        payment_data["payment_method_id"] = "pix"
-    else:
-        raise HTTPException(status_code=400, detail="Invalid payment method")
+    card_token = card_token_result["response"]["id"]
+    payment_data["token"] = card_token
+    payment_data["payment_method_id"] = get_payment_method_id(card.card_number)
 
     payment_response = sdk.payment().create(payment_data)
 
     if payment_response["status"] == 201:
         payment_result = payment_response["response"]
-        db.payments.insert_one({
-            "user_id": user["_id"],
-            "payment_id": payment_result["id"],
-            "status": payment_result["status"],
-            "amount": float(payment.amount),
-            "description": payment.description,
-            "payment_method": payment.payment_method,
-            "payment_date": datetime.utcnow(),
-            "credits_added": False
-        })
 
-        if payment.payment_method == "credit_card" and payment_result["status"] == "approved":
-            # Add credits to user's account immediately for approved credit card payments
-            credits_to_add = float(payment.amount) / CREDIT_VALUE
-            db.users.update_one(
-                {"_id": user["_id"]},
-                {"$inc": {"credits": credits_to_add}}
-            )
-            db.payments.update_one(
-                {"payment_id": payment_result["id"]},
-                {"$set": {"credits_added": True}}
-            )
+        # Update the payment document with Mercado Pago's payment ID and status
+        db.payments.update_one(
+            {"_id": ObjectId(payment_id)},
+            {"$set": {
+                "payment_id": payment_result["id"],
+                "status": payment_result["status"]
+            }}
+        )
 
         return PaymentResponse(
             id=str(payment_result["id"]),
             status=payment_result["status"],
-            amount=float(payment.amount),
-            description=payment.description,
-            payment_method=payment.payment_method
+            amount=PRICE,
+            description=f"{SOFTWARE_NAME} Pro Subscription",
+            payment_method="credit_card",
+            external_reference=payment_id
         )
     else:
+        # If payment failed, update the status in the database
+        db.payments.update_one(
+            {"_id": ObjectId(payment_id)},
+            {"$set": {"status": "failed"}}
+        )
         raise HTTPException(status_code=400, detail="Payment creation failed")
-
-@router.post("/create_pix_payment", response_model=PixPaymentResponse)
-async def create_pix_payment(payment: PixPaymentCreate, current_user: str = Depends(get_current_user)):
-    db = get_db()
-    user = db.users.find_one({"email": current_user})
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    payment_data = {
-        "transaction_amount": float(payment.amount),
-        "description": payment.description,
-        "payment_method_id": "pix",
-        "payer": {
-            "email": user["email"]
-        }
-    }
-
-    payment_response = sdk.payment().create(payment_data)
-
-    if payment_response["status"] == 201:
-        payment_result = payment_response["response"]
-        db.payments.insert_one({
-            "user_id": user["_id"],
-            "payment_id": str(payment_result["id"]),
-            "status": payment_result["status"],
-            "amount": float(payment.amount),
-            "description": payment.description,
-            "payment_method": "pix",
-            "payment_date": datetime.utcnow(),
-            "credits_added": False
-        })
-
-        return PixPaymentResponse(
-            qr_code=payment_result["point_of_interaction"]["transaction_data"]["qr_code"],
-            qr_code_base64=payment_result["point_of_interaction"]["transaction_data"]["qr_code_base64"],
-            ticket_url=payment_result["point_of_interaction"]["transaction_data"]["ticket_url"]
-        )
-    else:
-        raise HTTPException(status_code=400, detail="Pix payment creation failed")
 
 @router.post("/webhook")
 async def payment_webhook(data: dict):
@@ -167,19 +149,11 @@ async def payment_webhook(data: dict):
             db = get_db()
             db_payment = db.payments.find_one({"payment_id": payment_id})
 
-            if db_payment and not db_payment["credits_added"] and payment["status"] == "approved":
-                print("in")
-                user = db.users.find_one({"_id": db_payment["user_id"]})
-                if user:
-                    credits_to_add = float(payment["transaction_amount"]) / CREDIT_VALUE
-                    db.users.update_one(
-                        {"_id": user["_id"]},
-                        {"$inc": {"credits": credits_to_add}}
-                    )
-                    db.payments.update_one(
-                        {"payment_id": payment_id},
-                        {"$set": {"credits_added": True, "status": "approved"}}
-                    )
+            if db_payment and payment["status"] == "approved":
+                db.payments.update_one(
+                    {"payment_id": payment_id},
+                    {"$set": {"status": "approved"}}
+                )
 
     return {"status": "success"}
 
@@ -214,11 +188,12 @@ async def get_payments(
     # Prepare response
     items = [
         PaymentResponse(
-            id=str(payment["payment_id"]),
+            id=str(payment.get("payment_id", payment["_id"])),
             status=payment["status"],
             amount=payment["amount"],
             description=payment["description"],
-            payment_method=payment["payment_method"]
+            payment_method=payment["payment_method"],
+            external_reference=str(payment["_id"])
         ) for payment in payments
     ]
 
@@ -229,36 +204,3 @@ async def get_payments(
         size=size,
         pages=total_pages
     )
-
-@router.get("/user_credits")
-async def get_user_credits(current_user: str = Depends(get_current_user)):
-    db = get_db()
-    user = db.users.find_one({"email": current_user})
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"credits": user.get("credits", 0)}
-
-# @router.post("/add_credits")
-# async def add_credits(credits_data: UserAddCredits, current_user: str = Depends(get_current_user)):
-#     db = get_db()
-#     user = db.users.find_one({"email": current_user})
-
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-
-#     payment_amount = credits_data.amount * CREDIT_VALUE
-
-#     if credits_data.payment_method == "credit_card":
-#         # Implement credit card payment logic
-#         # This should create a payment and immediately add credits if approved
-#         pass
-#     elif credits_data.payment_method == "pix":
-#         # Implement Pix payment logic
-#         # This should create a Pix payment, but not add credits until confirmed via webhook
-#         pass
-#     else:
-#         raise HTTPException(status_code=400, detail="Invalid payment method")
-
-#     return {"message": f"Payment of {payment_amount} created for {credits_data.amount} credits"}

@@ -10,11 +10,14 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def get_password_hash(password):
     return pwd_context.hash(password)
+
 
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=24)):
     to_encode = data.copy()
@@ -22,6 +25,7 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=2
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return encoded_jwt
+
 
 def decode_token(token: str):
     try:
@@ -32,21 +36,32 @@ def decode_token(token: str):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     payload = decode_token(token)
     return payload.get("sub")
 
+
 def create_user_response(user: dict) -> dict:
-    user_response = UserResponse(
-        email=user["email"],
-        username=user["username"],
-        id=str(user["_id"]),
-        credits=user.get("credits", 0)  # Add this line
-    )
+    user_response = UserResponse(email=user["email"], username=user["username"], id=str(user["_id"]))
     access_token = create_access_token(data={"sub": user["email"]})
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "data": user_response.dict()
-    }
+    return {"access_token": access_token, "token_type": "bearer", "data": user_response.dict()}
+
+
+def create_reset_token(user_id: str):
+    expire = datetime.utcnow() + timedelta(hours=3)
+    to_encode = {"sub": str(user_id), "exp": expire}
+    return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def verify_reset_token(token: str, user_id: str):
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload["sub"] != user_id:
+            return False
+        return True
+    except jwt.ExpiredSignatureError:
+        return False
+    except jwt.InvalidTokenError:
+        return False

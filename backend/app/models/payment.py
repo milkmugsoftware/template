@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
-from decimal import Decimal
-from typing import List, Optional
+from typing import List
 
 class CardInfo(BaseModel):
     card_number: str
@@ -10,10 +9,8 @@ class CardInfo(BaseModel):
     cardholder_name: str
 
 class PaymentCreate(BaseModel):
-    amount: Decimal = Field(..., decimal_places=2)
-    description: str
-    installments: int = 1
-    payment_method: str  # 'credit_card' or 'pix'
+    payer_first_name: str
+    payer_last_name: str
 
 class PaymentResponse(BaseModel):
     id: str
@@ -21,11 +18,7 @@ class PaymentResponse(BaseModel):
     amount: float
     description: str
     payment_method: str
-
-    class Config:
-        json_encoders = {
-            Decimal: float
-        }
+    external_reference: str
 
 class PaginatedPaymentResponse(BaseModel):
     items: List[PaymentResponse]
@@ -33,12 +26,3 @@ class PaginatedPaymentResponse(BaseModel):
     page: int
     size: int
     pages: int
-
-class PixPaymentCreate(BaseModel):
-    amount: Decimal = Field(..., decimal_places=2)
-    description: str
-
-class PixPaymentResponse(BaseModel):
-    qr_code: str
-    qr_code_base64: str
-    ticket_url: str
