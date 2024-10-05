@@ -1,13 +1,13 @@
 import { Box, Typography, Button, Container, useTheme, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Paper } from '@mui/material';
 import GradientBackground from '../components/GradientBackground';
 import { useState, useEffect } from 'react';
 import { MonitorHeart, Analytics, AccountTree, Notifications, ArrowForward } from '@mui/icons-material';
 
 const HeroSection = styled(Box)(({ theme }) => ({
-  minHeight: '100vh',
+  minHeight: '50vh',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -25,7 +25,6 @@ const HeroContent = styled(Box)(({ theme }) => ({
   maxWidth: '600px',
   position: 'relative',
   zIndex: 1,
-  backdropFilter: 'blur(5px)',
   [theme.breakpoints.up('md')]: {
     padding: 0,
     maxWidth: '100%',
@@ -86,10 +85,10 @@ const Landing = () => {
           display: 'flex', 
           flexDirection: 'column',  
           justifyContent: 'center', 
-          minHeight: '100vh',
+          minHeight: '75vh',
           [theme.breakpoints.up('md')]: {
             justifyContent: 'flex-start',
-            paddingTop: theme.spacing(15),
+            paddingTop: theme.spacing(5),
           },
         }}>
           <StarLine/>
@@ -108,7 +107,7 @@ const Landing = () => {
               },
             }}
           >
-            Zenalyx
+            Zanalyx
           </Typography>
           <Typography
             variant="subtitle1"
@@ -128,20 +127,12 @@ const Landing = () => {
             Empowering traders with advanced crypto whale tracking and analytics
           </Typography>
           <HeroContent>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentTextIndex}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-              >
                 <Typography
                   variant="h4"
                   gutterBottom
                   sx={{ 
                     fontFamily: 'Anaheim, sans-serif', 
-                    height: '3rem', 
+                    height: '1rem', 
                     textAlign: 'center',
                     [theme.breakpoints.up('md')]: {
                       fontSize: '2.5rem',
@@ -152,8 +143,6 @@ const Landing = () => {
                 >
                   {texts[currentTextIndex]}
                 </Typography>
-              </motion.div>
-            </AnimatePresence>
             <StarLine />
             <AnimatedButton
               variant="outlined"
@@ -245,29 +234,26 @@ const Landing = () => {
             viewport={{ once: true }}
           >
             <Typography variant="h2" align="center" gutterBottom>
-              Why Choose Zenalyx?
+              Why Choose Zanalyx?
             </Typography>
-            <FlexContainer alignItems="center">
-              <FlexItem>
+            <FlexContainer alignItems="center" justifyContent="center">
+              <FlexItem sx={{ textAlign: 'center', maxWidth: '600px' }}>
                 <Typography variant="body1" paragraph>
-                  Zenalyx provides unparalleled insights into the movements of crypto whales, giving you a competitive edge in the market. Our advanced algorithms and real-time data processing ensure you're always one step ahead.
+                  Zanalyx provides unparalleled insights into the movements of crypto whales, giving you a competitive edge in the market. Our advanced algorithms and real-time data processing ensure you're always one step ahead.
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  With customizable alerts, multi-chain support, and in-depth analytics, Zenalyx is the ultimate tool for serious crypto traders and researchers.
+                  With customizable alerts, multi-chain support, and in-depth analytics, Zanalyx is the ultimate tool for serious crypto traders and researchers.
                 </Typography>
                 <AnimatedButton
                   variant="contained"
-                  color="primary"
                   size="large"
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5 }}
+                  sx={{ bgcolor: 'black', color: 'white', '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' } }}
                 >
                   Learn More
                 </AnimatedButton>
-              </FlexItem>
-              <FlexItem>
-                {/* Add an image or illustration showcasing the platform */}
               </FlexItem>
             </FlexContainer>
           </motion.div>
@@ -288,29 +274,52 @@ const Landing = () => {
           </Typography>
           <FlexContainer justifyContent="center">
             {[
-              { title: 'Basic', price: '$10/month', features: ['Up to 20GB of downloaded data per month', 'Coming Soon'] },
-              { title: 'Pro', price: '$100/month', features: ['Up to 20GB of downloaded data per month', 'Coming Soon'] },
+              { 
+                title: 'Standard', 
+                price: '$10/month', 
+                features: [
+                  'Real-time whale transaction alerts',
+                  'Basic analytics dashboard',
+                  'Single blockchain support',
+                  '',
+                  '',
+                ]
+              },
+              { 
+                title: 'Pro', 
+                price: '$99/month', 
+                features: [
+                  'Advanced predictive analytics',
+                  'Multi-chain tracking and analysis',
+                  'Custom alert configurations',
+                  'API access for integration',
+                  'Priority customer support',
+                ]
+              },
             ].map((plan, index) => (
-              <FlexItem key={index}>
+              <FlexItem key={index} sx={{ width: '300px', height: '400px' }}>
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
+                  style={{ height: '100%' }}
                 >
-                  <FeatureCard elevation={3}>
-                    <Typography variant="h4" component="h3" gutterBottom>
-                      {plan.title}
-                    </Typography>
-                    <Typography variant="h5" color="primary" gutterBottom>
-                      {plan.price}
-                    </Typography>
+                  <FeatureCard elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <Box>
-                      {plan.features.map((feature, fIndex) => (
-                        <Typography key={fIndex} variant="body1" paragraph>
-                          {feature}
-                        </Typography>
-                      ))}
+                      <Typography variant="h4" component="h3" gutterBottom>
+                        {plan.title}
+                      </Typography>
+                      <Typography variant="h5" color="primary" gutterBottom>
+                        {plan.price}
+                      </Typography>
+                      <Box>
+                        {plan.features.map((feature, fIndex) => (
+                          <Typography key={fIndex} variant="body1" paragraph>
+                            {feature}
+                          </Typography>
+                        ))}
+                      </Box>
                     </Box>
                     <Button variant="outlined" color="primary" disabled>
                       Coming Soon
@@ -337,16 +346,16 @@ const Landing = () => {
               Get Started Today
             </Typography>
             <Typography variant="body1" align="center" paragraph>
-              Join the growing community of traders and researchers who trust Zenalyx for their crypto whale tracking needs.
+              Join the growing community of traders and researchers who trust Zanalyx for their crypto whale tracking needs.
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <AnimatedButton
                 variant="contained"
-                color="primary"
                 size="large"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
+                sx={{ bgcolor: 'black', color: 'white', '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' } }}
               >
                 Sign Up Now
               </AnimatedButton>

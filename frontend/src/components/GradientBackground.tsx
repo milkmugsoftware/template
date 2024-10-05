@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-const BackgroundElement = ({ size, initialPosition, type, gradient }: { size: number, initialPosition: { x: number, y: number }, type: string, gradient: string }) => {
+const BackgroundElement = ({  type }: { initialPosition: { x: number, y: number }, type: string, gradient: string }) => {
   let shape;
   switch(type) {
     case 'circle':
@@ -22,7 +22,7 @@ const BackgroundElement = ({ size, initialPosition, type, gradient }: { size: nu
     'linear-gradient(to bottom right, #6DD5FA, #2980B9)',
     'linear-gradient(to bottom right, #FF9A8B, #FF6A88)',
   ];
-  const BackgroundElement = styled(motion.div)(({ theme }) => ({
+  const BackgroundElement = styled(motion.div)(() => ({
     position: 'absolute',
     borderRadius: '50%',
     filter: 'blur(40px)',
@@ -70,7 +70,8 @@ const GradientBackground = () => {
       <>
         {[...Array(1)].map((_, i) => (
           <BackgroundElement 
-            key={`element-${i}`} 
+            key={`element-${i}`}
+            //@ts-ignore
             size={Math.random() * 200 + 50}
             initialPosition={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
             type={['circle', 'fluid'][Math.floor(Math.random() * 2)]}

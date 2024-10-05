@@ -1,8 +1,10 @@
 import { createTheme } from '@mui/material';
 import { amber, common, green, grey, lightBlue, red } from '@mui/material/colors';
 import { shadThemeShadows } from './shadows';
-const background = common['black'];
-const bodyBackground = common['black'];
+
+const bodyBackground = 'rgba(0, 0, 0, 0.3)';
+const glassBackground = 'rgba(255, 255, 255, 0.15)';
+const glassHoverBackground = 'rgba(255, 255, 255, 0.25)';
 
 export const shadTheme = (mode: 'light' | 'dark') => {
   const isDarkMode = mode === 'dark';
@@ -30,14 +32,14 @@ export const shadTheme = (mode: 'light' | 'dark') => {
       warning: {
         main: amber['900'],
       },
-      divider: isDarkMode ? grey[800] : grey[300],
+      divider: isDarkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
       background: {
-        default: isDarkMode ? background : grey[50],
-        paper: isDarkMode ? background : grey[50],
+        default: 'transparent',
+        paper: glassBackground,
       },
     },
     shape: {
-      borderRadius: 4,
+      borderRadius: 8,
     },
     spacing: 8,
     typography: {
@@ -96,10 +98,11 @@ export const shadTheme = (mode: 'light' | 'dark') => {
           },
           body: {
             minHeight: '100%',
-            backgroundColor: isDarkMode ? bodyBackground : '#fbfbfb',
+            backgroundColor: bodyBackground,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'top right',
             backgroundSize: '100%',
+            backdropFilter: 'blur(10px)',
           },
         },
       },
@@ -116,7 +119,8 @@ export const shadTheme = (mode: 'light' | 'dark') => {
       MuiInputBase: {
         styleOverrides: {
           root: {
-            backgroundColor: isDarkMode ? common['black'] : common['white'],
+            backgroundColor: glassBackground,
+            backdropFilter: 'blur(5px)',
           },
         },
       },
@@ -133,20 +137,25 @@ export const shadTheme = (mode: 'light' | 'dark') => {
           root: {
             textTransform: 'none',
             boxShadow: 'none',
-            borderRadius: 0,
-            border: '1px solid black',
+            borderRadius: 8,
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backgroundColor: glassBackground,
+            backdropFilter: 'blur(5px)',
+            '&:hover': {
+              backgroundColor: glassHoverBackground,
+            },
           },
           outlined: {
             borderWidth: '1px',
           },
           sizeSmall: {
-            padding: '2px 12px',
+            padding: '4px 12px',
           },
           sizeMedium: {
-            padding: '6px 18px',
+            padding: '6px 16px',
           },
           sizeLarge: {
-            padding: '10px 24px',
+            padding: '8px 22px',
           },
         },
       },
@@ -154,24 +163,28 @@ export const shadTheme = (mode: 'light' | 'dark') => {
         styleOverrides: {
           root: {
             boxShadow: 'none',
-            border: 0,
-            borderBottom: `1px solid ${isDarkMode ? grey[800] : grey[300]}`,
+            backgroundColor: glassBackground,
+            backdropFilter: 'blur(10px)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
           },
         },
       },
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: isDarkMode ? background : common['white'],
-            border: `1px solid ${isDarkMode ? grey[800] : grey[300]}`,
+            backgroundColor: glassBackground,
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
           },
         },
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            border: '1px solid black',
-            borderRadius: 0,
+            backgroundColor: glassBackground,
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: 8,
           },
         },
       },
@@ -179,9 +192,10 @@ export const shadTheme = (mode: 'light' | 'dark') => {
         styleOverrides: {
           root: {
             backgroundImage: 'none',
-            backgroundColor: isDarkMode ? '#090909' : common['white'],
-            border: '1px solid black',
-            borderRadius: 0,
+            backgroundColor: glassBackground,
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: 8,
           },
         },
       },

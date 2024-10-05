@@ -6,7 +6,7 @@ import GradientBackground from '../components/GradientBackground';
 import axios from 'axios';
 
 const QuestionsSection = styled(Box)(({ theme }) => ({
-  minHeight: '100vh',
+  minHeight: '80vh',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -16,9 +16,10 @@ const QuestionsSection = styled(Box)(({ theme }) => ({
 }));
 
 const QuestionForm = styled(motion.form)(({ theme }) => ({
-  backgroundColor: `${theme.palette.background.paper}80`,
-  border: `1px solid ${theme.palette.text.primary}`,
-  borderRadius: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
+  borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(4),
   display: 'flex',
   flexDirection: 'column',
@@ -26,6 +27,28 @@ const QuestionForm = styled(motion.form)(({ theme }) => ({
   width: '100%',
   maxWidth: '600px',
   margin: '0 auto',
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+      borderRadius: theme.shape.borderRadius,
+    },
+    '&:hover fieldset': {
+      borderColor: 'rgba(255, 255, 255, 0.5)',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.primary.main,
+    },
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  '& .MuiInputLabel-root': {
+    color: theme.palette.text.primary,
+  },
+  '& .MuiInputBase-input': {
+    color: theme.palette.text.primary,
+  },
 }));
 
 const Questions = () => {
@@ -69,7 +92,7 @@ const Questions = () => {
           >
             {!submitted ? (
               <>
-                <TextField
+                <StyledTextField
                   fullWidth
                   label="Name"
                   variant="outlined"
@@ -78,7 +101,7 @@ const Questions = () => {
                   onChange={(e) => setName(e.target.value)}
                   required
                 />
-                <TextField
+                <StyledTextField
                   fullWidth
                   label="Email"
                   variant="outlined"
@@ -88,7 +111,7 @@ const Questions = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <TextField
+                <StyledTextField
                   fullWidth
                   label="Your Question"
                   variant="outlined"
@@ -104,7 +127,16 @@ const Questions = () => {
                   variant="outlined"
                   color="primary"
                   size="large"
-                  sx={{ mt: 3, borderColor: 'text.primary', color: 'text.primary' }}
+                  sx={{ 
+                    mt: 3, 
+                    borderColor: 'rgba(255, 255, 255, 0.3)', 
+                    color: 'text.primary',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                    },
+                  }}
                 >
                   Submit Question
                 </Button>

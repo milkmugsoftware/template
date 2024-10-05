@@ -7,7 +7,7 @@ import TopNav from './pages/TopNav'
 import Footer from './pages/Footer'
 import Pricing from './pages/Pricing'
 import Questions from './pages/Questions'
-import MainAppPage from './app/MainAppPage'
+import MainAppPage from './pages/MainAppPage'
 function App() {
   return (
     <Router>

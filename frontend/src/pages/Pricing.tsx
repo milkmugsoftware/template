@@ -11,18 +11,24 @@ const PricingSection = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   position: 'relative',
   overflow: 'hidden',
-  padding: theme.spacing(8, 2),
+  paddingTop: theme.spacing(4),
+  paddingBottom: theme.spacing(4),
 }));
 
 const PricingCard = styled(motion.div)(({ theme }) => ({
-  backgroundColor: `${theme.palette.background.paper}80`,
-  border: `1px solid ${theme.palette.text.primary}`,
-  borderRadius: 0,
-  padding: theme.spacing(4),
+  padding: theme.spacing(3),
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
-  height: '100%',
+  justifyContent: 'space-between',
+  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
+  borderRadius: theme.shape.borderRadius,
+  transition: 'transform 0.3s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+  },
 }));
 
 const FeatureItem = styled(Box)(({ theme }) => ({
@@ -42,21 +48,17 @@ const Pricing = () => {
         'Real-time whale transaction alerts',
         'Basic analytics dashboard',
         'Single blockchain support',
-        'Daily market insights',
-        '24/7 customer support',
       ],
     },
     {
       title: 'Pro',
       price: '$99',
       features: [
-        'All Standard features',
         'Advanced predictive analytics',
         'Multi-chain tracking and analysis',
         'Custom alert configurations',
         'API access for integration',
         'Priority customer support',
-        'Exclusive webinars and reports',
       ],
     },
   ];
@@ -74,7 +76,7 @@ const Pricing = () => {
               fontFamily: 'Lexend Mega, sans-serif',
               fontWeight: 800,
               mb: 6,
-              fontSize: { xs: '2rem', sm: '3rem', md: '3.75rem' },
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
             }}
           >
             Choose Your Plan
@@ -93,10 +95,10 @@ const Pricing = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 sx={{ 
-                  flex: { xs: '1', md: '0 1 400px' }, 
+                  flex: { xs: '1', md: '0 1 350px' }, 
                   width: '100%',
-                  maxWidth: '400px', 
-                  height: { xs: 'auto', md: '600px' },
+                  maxWidth: '350px', 
+                  height: { xs: 'auto', md: '500px' },
                   mb: { xs: 4, md: 0 }
                 }}
               >
