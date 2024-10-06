@@ -1,0 +1,8 @@
+{
+  "signIn": "Sign in",
+  "emailAddress": "Email Address",
+  "password": "Password",
+  "forgotPassword": "Forgot password?",
+  "dontHaveAccount": "Don't have an account? Sign Up",
+  "loginFailed": "Login failed. Please check your credentials."
+}

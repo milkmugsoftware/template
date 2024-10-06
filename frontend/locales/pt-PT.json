@@ -1,0 +1,8 @@
+{
+  "signIn": "Iniciar sessão",
+  "emailAddress": "Endereço de E-mail",
+  "password": "Palavra-passe",
+  "forgotPassword": "Esqueceu a palavra-passe?",
+  "dontHaveAccount": "Não tem uma conta? Registe-se",
+  "loginFailed": "Falha no início de sessão. Por favor, verifique as suas credenciais."
+}

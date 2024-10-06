@@ -1,0 +1,8 @@
+{
+  "signIn": "Entrar",
+  "emailAddress": "Endereço de E-mail",
+  "password": "Senha",
+  "forgotPassword": "Esqueceu a senha?",
+  "dontHaveAccount": "Não tem uma conta? Cadastre-se",
+  "loginFailed": "Falha no login. Por favor, verifique suas credenciais."
+}

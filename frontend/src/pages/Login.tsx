@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Paper, Link, Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const LoginContainer = styled(Paper)({
   padding: '32px',
@@ -17,6 +18,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -24,9 +26,8 @@ const Login = () => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
       console.log('Login successful:', response.data);
-      // Handle successful login (e.g., store token, redirect)
     } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      setError(t('loginFailed'));
       console.error('Login error:', err);
     }
   };
@@ -34,7 +35,7 @@ const Login = () => {
   return (
     <LoginContainer elevation={3}>
       <Typography component="h1" variant="h5">
-        Sign in
+        {t('signIn')}
       </Typography>
       <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
         <TextField
@@ -42,7 +43,7 @@ const Login = () => {
           required
           fullWidth
           id="email"
-          label="Email Address"
+          label={t('emailAddress')}
           name="email"
           autoComplete="email"
           autoFocus
@@ -54,7 +55,7 @@ const Login = () => {
           required
           fullWidth
           name="password"
-          label="Password"
+          label={t('password')}
           type="password"
           id="password"
           autoComplete="current-password"
@@ -72,17 +73,17 @@ const Login = () => {
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
         >
-          Sign In
+          {t('signIn')}
         </Button>
         <Grid container>
           <Grid item xs>
             <Link href="#" variant="body2">
-              Forgot password?
+              {t('forgotPassword')}
             </Link>
           </Grid>
           <Grid item>
             <Link href="#" variant="body2">
-              {"Don't have an account? Sign Up"}
+              {t('dontHaveAccount')}
             </Link>
           </Grid>
         </Grid>
