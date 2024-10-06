@@ -1,43 +1,51 @@
 import { createTheme } from '@mui/material';
-import { amber, common, green, grey, lightBlue, red } from '@mui/material/colors';
+import { common, green, grey, lightBlue, red } from '@mui/material/colors';
+import { alpha } from '@mui/material/styles';
 import { shadThemeShadows } from './shadows';
-const background = common['black'];
-const bodyBackground = common['black'];
+
+const darkBackground = alpha(common.black, 0.6);
+const darkBodyBackground = alpha(common.black, 0.8);
+const lightBackground = alpha(common.white, 0.8);
+const lightBodyBackground = alpha(common.white, 0.9);
 
 export const shadTheme = (mode: 'light' | 'dark') => {
-  const isDarkMode = mode === 'dark';
+  const isDarkMode = mode === 'light';
 
   return createTheme({
     palette: {
       mode,
       primary: {
-        dark: isDarkMode ? grey['200'] : common['black'],
-        main: isDarkMode ? common['white'] : grey['900'],
-        light: isDarkMode ? grey['800'] : grey['100'],
+        dark: isDarkMode ? alpha(grey[200], 0.8) : lightBlue[700],
+        main: isDarkMode ? alpha(common.white, 0.8) : lightBlue[500],
+        light: isDarkMode ? alpha(grey[800], 0.8) : lightBlue[300],
       },
       secondary: {
-        main: isDarkMode ? grey['100'] : grey['800'],
+        main: isDarkMode ? alpha(grey[100], 0.8) : grey[700],
       },
       success: {
-        main: green['900'],
+        main: isDarkMode ? alpha(green[900], 0.8) : green[600],
       },
       error: {
-        main: red['900'],
+        main: isDarkMode ? alpha(red[900], 0.8) : red[600],
       },
       info: {
-        main: lightBlue['900'],
+        main: isDarkMode ? alpha(lightBlue[900], 0.8) : lightBlue[600],
       },
       warning: {
-        main: amber['900'],
+        main: isDarkMode ? alpha(lightBlue[900], 0.8) : lightBlue[600],
       },
-      divider: isDarkMode ? grey[800] : grey[300],
+      divider: isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6),
       background: {
-        default: isDarkMode ? background : grey[50],
-        paper: isDarkMode ? background : grey[50],
+        default: isDarkMode ? darkBackground : lightBackground,
+        paper: isDarkMode ? darkBackground : lightBackground,
+      },
+      text: {
+        primary: isDarkMode ? common.white : common.black,
+        secondary: isDarkMode ? alpha(common.white, 0.7) : alpha(common.black, 0.7),
       },
     },
     shape: {
-      borderRadius: 4,
+      borderRadius: 12,
     },
     spacing: 8,
     typography: {
@@ -95,10 +103,11 @@ export const shadTheme = (mode: 'light' | 'dark') => {
           },
           body: {
             minHeight: '100%',
-            backgroundColor: isDarkMode ? bodyBackground : '#fbfbfb',
+            backgroundColor: isDarkMode ? darkBodyBackground : lightBodyBackground,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'top right',
             backgroundSize: '100%',
+            backdropFilter: 'blur(10px)',
           },
         },
       },
@@ -115,7 +124,19 @@ export const shadTheme = (mode: 'light' | 'dark') => {
       MuiInputBase: {
         styleOverrides: {
           root: {
-            backgroundColor: isDarkMode ? common['black'] : common['white'],
+            backgroundColor: isDarkMode ? alpha(common.black, 0.6) : alpha(common.white, 0.8),
+            color: isDarkMode ? common.white : common.black,
+            '&::placeholder': {
+              color: isDarkMode ? alpha(common.white, 0.5) : alpha(common.black, 0.5),
+            },
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${isDarkMode ? alpha(common.white, 0.23) : alpha(common.black, 0.23)}`,
+            '&:hover': {
+              border: `1px solid ${isDarkMode ? alpha(common.white, 0.5) : alpha(common.black, 0.5)}`,
+            },
+            '&.Mui-focused': {
+              border: `2px solid ${isDarkMode ? common.white : common.black}`,
+            },
           },
         },
       },
@@ -132,6 +153,14 @@ export const shadTheme = (mode: 'light' | 'dark') => {
           root: {
             textTransform: 'none',
             boxShadow: 'none',
+            backdropFilter: 'blur(10px)',
+            color: isDarkMode ? common.white : common.black,
+            backgroundColor: isDarkMode ? alpha(common.white, 0.1) : alpha(common.black, 0.1),
+            border: `1px solid ${isDarkMode ? alpha(common.white, 0.23) : alpha(common.black, 0.23)}`,
+            '&:hover': {
+              backgroundColor: isDarkMode ? alpha(common.white, 0.2) : alpha(common.black, 0.2),
+              border: `1px solid ${isDarkMode ? alpha(common.white, 0.5) : alpha(common.black, 0.5)}`,
+            },
           },
           sizeSmall: {
             padding: '2px 12px',
@@ -149,15 +178,18 @@ export const shadTheme = (mode: 'light' | 'dark') => {
           root: {
             boxShadow: 'none',
             border: 0,
-            borderBottom: `1px solid ${isDarkMode ? grey[800] : grey[300]}`,
+            borderBottom: `1px solid ${isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6)}`,
+            backdropFilter: 'blur(10px)',
+            backgroundColor: isDarkMode ? alpha(darkBackground, 0.6) : alpha(lightBackground, 0.8),
           },
         },
       },
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: isDarkMode ? background : common['white'],
-            border: `1px solid ${isDarkMode ? grey[800] : grey[300]}`,
+            backgroundColor: isDarkMode ? alpha(darkBackground, 0.6) : alpha(lightBackground, 0.8),
+            border: `1px solid ${isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6)}`,
+            backdropFilter: 'blur(10px)',
           },
         },
       },
@@ -165,6 +197,9 @@ export const shadTheme = (mode: 'light' | 'dark') => {
         styleOverrides: {
           root: {
             backgroundImage: 'none',
+            backdropFilter: 'blur(10px)',
+            backgroundColor: isDarkMode ? alpha('#090909', 0.6) : alpha(common.white, 0.8),
+            border: `1px solid ${isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6)}`,
           },
         },
       },
@@ -172,8 +207,16 @@ export const shadTheme = (mode: 'light' | 'dark') => {
         styleOverrides: {
           root: {
             backgroundImage: 'none',
-            backgroundColor: isDarkMode ? '#090909' : common['white'],
-            border: `1px solid ${isDarkMode ? grey[800] : grey[300]}`,
+            backdropFilter: 'blur(10px)',
+            backgroundColor: isDarkMode ? alpha('#090909', 0.6) : alpha(common.white, 0.8),
+            border: `1px solid ${isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6)}`,
+          },
+        },
+      },
+      MuiLink: {
+        styleOverrides: {
+          root: {
+            color: isDarkMode ? lightBlue[300] : lightBlue[700],
           },
         },
       },
