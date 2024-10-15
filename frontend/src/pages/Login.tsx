@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Paper, Link, Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginContainer = styled(Paper)({
   padding: '32px',
@@ -19,13 +20,15 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { t } = useTranslation();
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      console.log('Login successful:', response.data);
+      await login(email, password);
+      navigate('/dashboard');
     } catch (err) {
       setError(t('loginFailed'));
       console.error('Login error:', err);

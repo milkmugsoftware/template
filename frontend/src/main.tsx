@@ -3,17 +3,25 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { ThemeProvider } from '@mui/material/styles'
-import { getThemeByName } from './theme.ts'
+import { MainTheme } from './MainTheme.ts'
 import CssBaseline from '@mui/material/CssBaseline'
 import './i18n'
+import { useMediaQuery } from '@mui/material'
 
-const theme = getThemeByName('shadTheme', 'dark')
+function ThemedApp() {
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
+  const theme = MainTheme(prefersDarkMode ? 'light' : 'dark')
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <App />
     </ThemeProvider>
+  )
+}
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <ThemedApp />
   </StrictMode>,
 )

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, JSONResponse
 from models.user import UserCreate, UserLogin, UserChangePassword
 from utils.security import get_password_hash, verify_password, get_current_user, create_user_response
 from database import get_db
@@ -40,3 +40,22 @@ async def change_password(user_data: UserChangePassword, current_user: str = Dep
     new_hashed_password = get_password_hash(user_data.new_password)
     db.users.update_one({"email": current_user}, {"$set": {"password": new_hashed_password}})
     return {"message": "Password changed successfully"}
+
+@router.get("/user")
+async def get_user_info(current_user: str = Depends(get_current_user)):
+    db = get_db()
+    user = db.users.find_one({"email": current_user})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "email": user["email"],
+        "username": user["username"],
+        "created_at": user["_id"].generation_time.isoformat(),
+        "credits": user.get("credits", 0)
+    }
+
+@router.post("/logout")
+async def logout():
+    response = JSONResponse(content={"message": "Logged out successfully"})
+    response.delete_cookie(key="access_token")
+    return response

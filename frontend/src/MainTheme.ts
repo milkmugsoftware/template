@@ -8,7 +8,7 @@ const darkBodyBackground = alpha(common.black, 0.8);
 const lightBackground = alpha(common.white, 0.8);
 const lightBodyBackground = alpha(common.white, 0.9);
 
-export const shadTheme = (mode: 'light' | 'dark') => {
+export const MainTheme = (mode: 'light' | 'dark') => {
   const isDarkMode = mode === 'light';
 
   return createTheme({
@@ -131,12 +131,11 @@ export const shadTheme = (mode: 'light' | 'dark') => {
             },
             backdropFilter: 'blur(10px)',
             border: `1px solid ${isDarkMode ? alpha(common.white, 0.23) : alpha(common.black, 0.23)}`,
+            borderRadius: 12,
             '&:hover': {
               border: `1px solid ${isDarkMode ? alpha(common.white, 0.5) : alpha(common.black, 0.5)}`,
             },
-            '&.Mui-focused': {
-              border: `2px solid ${isDarkMode ? common.white : common.black}`,
-            },
+
           },
         },
       },
