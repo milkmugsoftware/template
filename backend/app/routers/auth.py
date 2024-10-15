@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends, JSONResponse
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from models.user import UserCreate, UserLogin, UserChangePassword
 from utils.security import get_password_hash, verify_password, get_current_user, create_user_response
 from database import get_db
