@@ -19,6 +19,7 @@ class UserResponse(BaseModel):
     username: str
     id: str
     credits: float
+    email_verified: bool
 
 class UserAddCredits(BaseModel):
     amount: float

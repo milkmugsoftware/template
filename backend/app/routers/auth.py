@@ -1,18 +1,24 @@
 from urllib.parse import unquote_plus
+import asyncio
 
 from bson import ObjectId
 from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 from database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from fastapi.responses import JSONResponse, RedirectResponse
 from models.user import GoogleLogin, UserChangePassword, UserCreate, UserLogin
 from utils.google_auth import get_google_auth_url, get_google_token, verify_google_token
 from utils.security import create_user_response, get_current_user, get_password_hash, verify_password
+from utils.email_utils import send_verification_email, create_verification_token, verify_email_token
 
 router = APIRouter()
 
+async def send_email_async(to_email: str, token: str):
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, send_verification_email, to_email, token)
+
 @router.post("/register")
-async def register(user: UserCreate):
+async def register(user: UserCreate, background_tasks: BackgroundTasks):
     db = get_db()
     existing_user = db.users.find_one({"email": user.email})
     if existing_user:
@@ -22,10 +28,16 @@ async def register(user: UserCreate):
         "email": user.email,
         "username": user.username,
         "password": hashed_password,
-        "credits": 0
+        "credits": 0,
+        "email_verified": False
     }
     result = db.users.insert_one(new_user)
     new_user["_id"] = result.inserted_id
+
+    # Create and send verification email asynchronously
+    verification_token = create_verification_token(user.email)
+    background_tasks.add_task(send_email_async, user.email, verification_token)
+
     return create_user_response(new_user)
 
 @router.post("/login")
@@ -34,7 +46,40 @@ async def login(user: UserLogin):
     db_user = db.users.find_one({"email": user.email})
     if not db_user or not verify_password(user.password, db_user["password"]):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
+    if not db_user.get("email_verified", False):
+        raise HTTPException(status_code=403, detail="Email not verified")
     return create_user_response(db_user)
+
+@router.get("/verify-email")
+async def verify_email(token: str):
+    email = verify_email_token(token)
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    db = get_db()
+    result = db.users.update_one(
+        {"email": email},
+        {"$set": {"email_verified": True}}
+    )
+
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"message": "Email verified successfully"}
+
+@router.post("/resend-verification")
+async def resend_verification(email: str, background_tasks: BackgroundTasks):
+    db = get_db()
+    user = db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.get("email_verified", False):
+        raise HTTPException(status_code=400, detail="Email already verified")
+
+    verification_token = create_verification_token(email)
+    background_tasks.add_task(send_email_async, email, verification_token)
+
+    return {"message": "Verification email resent"}
 
 @router.get("/login/google")
 async def login_google(request: Request):
