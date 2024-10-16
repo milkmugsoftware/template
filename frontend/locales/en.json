@@ -11,5 +11,6 @@
   "signUp": "Sign up",
   "username": "Username",
   "registrationFailed": "Registration failed. Please try again.",
-  "alreadyHaveAccount": "Already have an account? Sign in"
+  "alreadyHaveAccount": "Already have an account? Sign in",
+  "loading": "Loading..."
 }

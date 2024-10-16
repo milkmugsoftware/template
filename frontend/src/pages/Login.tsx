@@ -1,20 +1,9 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Paper, Link } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
-
-const LoginContainer = styled(Paper)({
-  padding: '32px',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  maxWidth: '400px',
-  margin: 'auto',
-  marginTop: '64px',
-});
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -46,7 +35,18 @@ const Login = () => {
   };
 
   return (
-    <LoginContainer elevation={3}>
+    <Paper
+      elevation={3}
+      sx={{
+        padding: 4,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        maxWidth: 400,
+        margin: 'auto',
+        marginTop: 8,
+      }}
+    >
       <Typography component="h1" variant="h5">
         {t('signIn')}
       </Typography>
@@ -98,7 +98,7 @@ const Login = () => {
         </Box>
       </Box>
       <ForgotPasswordModal open={isModalOpen} onClose={handleCloseModal} />
-    </LoginContainer>
+    </Paper>
   );
 };
 
