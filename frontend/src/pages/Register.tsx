@@ -1,23 +1,15 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Paper, Link, Grid } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { Box, TextField, Button, Typography, Paper, Link } from '@mui/material';
 import axios from 'axios';
-
-const RegisterContainer = styled(Paper)({
-  padding: '32px',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  maxWidth: '400px',
-  margin: 'auto',
-  marginTop: '64px',
-});
+import { Link as RouterLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Register = () => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const handleRegister = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -25,17 +17,28 @@ const Register = () => {
     try {
       const response = await axios.post('/api/auth/register', { email, username, password });
       console.log('Registration successful:', response.data);
-      // Handle successful registration (e.g., store token, redirect)
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError(t('registrationFailed'));
       console.error('Registration error:', err);
     }
   };
 
   return (
-    <RegisterContainer elevation={3}>
+    <Box
+      component={Paper}
+      elevation={3}
+      sx={{
+        padding: '32px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        maxWidth: '400px',
+        margin: 'auto',
+        marginTop: '64px',
+      }}
+    >
       <Typography component="h1" variant="h5">
-        Sign up
+        {t('signUp')}
       </Typography>
       <Box component="form" onSubmit={handleRegister} noValidate sx={{ mt: 1 }}>
         <TextField
@@ -43,7 +46,7 @@ const Register = () => {
           required
           fullWidth
           id="email"
-          label="Email Address"
+          label={t('emailAddress')}
           name="email"
           autoComplete="email"
           autoFocus
@@ -55,7 +58,7 @@ const Register = () => {
           required
           fullWidth
           id="username"
-          label="Username"
+          label={t('username')}
           name="username"
           autoComplete="username"
           value={username}
@@ -66,7 +69,7 @@ const Register = () => {
           required
           fullWidth
           name="password"
-          label="Password"
+          label={t('password')}
           type="password"
           id="password"
           autoComplete="new-password"
@@ -84,17 +87,15 @@ const Register = () => {
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
         >
-          Sign Up
+          {t('signUp')}
         </Button>
-        <Grid container justifyContent="flex-end">
-          <Grid item>
-            <Link href="#" variant="body2">
-              Already have an account? Sign in
-            </Link>
-          </Grid>
-        </Grid>
+        <Box sx={{ textAlign: 'right' }}>
+          <Link component={RouterLink} to="/login" variant="body2">
+            {t('alreadyHaveAccount')}
+          </Link>
+        </Box>
       </Box>
-    </RegisterContainer>
+    </Box>
   );
 };
 

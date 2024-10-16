@@ -7,6 +7,11 @@ import esTranslations from '../locales/es.json';
 import ptBRTranslations from '../locales/pt-BR.json';
 import ptPTTranslations from '../locales/pt-PT.json';
 
+const getLocale = (): string => {
+  const language = navigator.language.split(/[-_]/)[0];
+  return language === 'pt' ? 'pt-BR' : language;
+};
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -18,8 +23,9 @@ i18n
       'pt-PT': { translation: ptPTTranslations },
     },
     fallbackLng: 'en',
+    lng: getLocale(),
     detection: {
-      order: ['navigator'],
+      order: ['navigator', 'htmlTag', 'path', 'subdomain'],
     },
     interpolation: {
       escapeValue: false,

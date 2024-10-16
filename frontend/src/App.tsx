@@ -27,7 +27,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 function AppContent() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const theme = MainTheme(prefersDarkMode ? 'dark' : 'light');
+  const theme = MainTheme(prefersDarkMode ? 'light' : 'dark');
   const { user, isLoading } = useAuth();
 
   if (isLoading) {

@@ -4,5 +4,12 @@
   "password": "Password",
   "forgotPassword": "Forgot password?",
   "dontHaveAccount": "Don't have an account? Sign Up",
-  "loginFailed": "Login failed. Please check your credentials."
+  "loginFailed": "Login failed. Please check your credentials.",
+  "resetPassword": "Reset Password",
+  "enterEmailForReset": "Enter your email address and we'll send you a link to reset your password.",
+  "sendResetLink": "Send Reset Link",
+  "signUp": "Sign up",
+  "username": "Username",
+  "registrationFailed": "Registration failed. Please try again.",
+  "alreadyHaveAccount": "Already have an account? Sign in"
 }

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Paper, Link, Grid } from '@mui/material';
+import { Box, TextField, Button, Typography, Paper, Link } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
 
 const LoginContainer = styled(Paper)({
   padding: '32px',
@@ -19,6 +20,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -35,12 +37,20 @@ const Login = () => {
     }
   };
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <LoginContainer elevation={3}>
       <Typography component="h1" variant="h5">
         {t('signIn')}
       </Typography>
-      <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+      <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1, width: '100%' }}>
         <TextField
           margin="normal"
           required
@@ -78,19 +88,16 @@ const Login = () => {
         >
           {t('signIn')}
         </Button>
-        <Grid container>
-          <Grid item xs>
-            <Link href="#" variant="body2">
-              {t('forgotPassword')}
-            </Link>
-          </Grid>
-          <Grid item>
-            <Link href="#" variant="body2">
-              {t('dontHaveAccount')}
-            </Link>
-          </Grid>
-        </Grid>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <Link component="button" variant="body2" onClick={handleOpenModal}>
+            {t('forgotPassword')}
+          </Link>
+          <Link component={RouterLink} to="/register" variant="body2">
+            {t('dontHaveAccount')}
+          </Link>
+        </Box>
       </Box>
+      <ForgotPasswordModal open={isModalOpen} onClose={handleCloseModal} />
     </LoginContainer>
   );
 };
