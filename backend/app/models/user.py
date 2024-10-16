@@ -5,7 +5,6 @@ class UserCreate(BaseModel):
     email: EmailStr
     username: str
     password: str
-    initial_credits: float = 0
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -24,3 +23,6 @@ class UserResponse(BaseModel):
 class UserAddCredits(BaseModel):
     amount: float
     payment_method: str  # 'credit_card' or 'pix'
+
+class GoogleLogin(BaseModel):
+    token: str

@@ -1,9 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import JSONResponse
-from models.user import UserCreate, UserLogin, UserChangePassword
-from utils.security import get_password_hash, verify_password, get_current_user, create_user_response
-from database import get_db
+from urllib.parse import unquote_plus
+
 from bson import ObjectId
+from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+from database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
+from models.user import GoogleLogin, UserChangePassword, UserCreate, UserLogin
+from utils.google_auth import get_google_auth_url, get_google_token, verify_google_token
+from utils.security import create_user_response, get_current_user, get_password_hash, verify_password
 
 router = APIRouter()
 
@@ -18,7 +22,7 @@ async def register(user: UserCreate):
         "email": user.email,
         "username": user.username,
         "password": hashed_password,
-        "credits": user.initial_credits
+        "credits": 0
     }
     result = db.users.insert_one(new_user)
     new_user["_id"] = result.inserted_id
@@ -31,6 +35,58 @@ async def login(user: UserLogin):
     if not db_user or not verify_password(user.password, db_user["password"]):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     return create_user_response(db_user)
+
+@router.get("/login/google")
+async def login_google(request: Request):
+    """Initiate Google Sign-In process"""
+    redirect_uri = str(request.url_for('google_auth_callback'))
+    return RedirectResponse(get_google_auth_url(redirect_uri))
+
+@router.get("/login/google/callback")
+async def google_auth_callback(request: Request):
+    """Handle Google Sign-In callback"""
+    try:
+        # Get all query parameters
+        params = dict(request.query_params)
+
+        # Ensure required parameters are present
+        if 'code' not in params:
+            raise HTTPException(status_code=400, detail="Missing authorization code")
+
+        # Decode the URL-encoded code
+        code = unquote_plus(params['code'])
+
+        redirect_uri = str(request.url_for('google_auth_callback'))
+
+        token = get_google_token(code, redirect_uri)
+
+        # Verify the token and get user info
+        idinfo = verify_google_token(token)
+
+        db = get_db()
+        user = db.users.find_one({"email": idinfo["email"]})
+
+        if not user:
+            # Create a new user if they don't exist
+            new_user = {
+                "email": idinfo["email"],
+                "username": idinfo.get("name", idinfo["email"].split("@")[0]),
+                "google_id": idinfo["sub"],
+                "credits": 0
+            }
+            result = db.users.insert_one(new_user)
+            new_user["_id"] = result.inserted_id
+            user = new_user
+        elif "google_id" not in user:
+            # Update existing user with Google ID if they haven't used Google login before
+            db.users.update_one({"_id": user["_id"]}, {"$set": {"google_id": idinfo["sub"]}})
+
+        return create_user_response(user)
+
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in google_auth_callback: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error processing Google callback: {str(e)}")
 
 @router.post("/change-password")
 async def change_password(user_data: UserChangePassword, current_user: str = Depends(get_current_user)):
