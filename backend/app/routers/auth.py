@@ -1,12 +1,13 @@
 from urllib.parse import unquote_plus
 import asyncio
+from datetime import datetime
 
 from bson import ObjectId
 from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from fastapi.responses import JSONResponse, RedirectResponse
-from models.user import GoogleLogin, UserChangePassword, UserCreate, UserLogin
+from models.user import GoogleLogin, UserChangePassword, UserCreate, UserLogin, UserAcceptTerms
 from utils.google_auth import get_google_auth_url, get_google_token, verify_google_token
 from utils.security import create_user_response, get_current_user, get_password_hash, verify_password
 from utils.email_utils import send_verification_email, create_verification_token, verify_email_token
@@ -29,7 +30,9 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
         "username": user.username,
         "password": hashed_password,
         "credits": 0,
-        "email_verified": False
+        "email_verified": False,
+        "created_at": datetime.utcnow(),
+        "terms_accepted": False
     }
     result = db.users.insert_one(new_user)
     new_user["_id"] = result.inserted_id
@@ -152,8 +155,10 @@ async def get_user_info(current_user: str = Depends(get_current_user)):
     return {
         "email": user["email"],
         "username": user["username"],
-        "created_at": user["_id"].generation_time.isoformat(),
-        "credits": user.get("credits", 0)
+        "created_at": user["created_at"].isoformat(),
+        "credits": user.get("credits", 0),
+        "email_verified": user.get("email_verified", False),
+        "terms_accepted": user.get("terms_accepted", False)
     }
 
 @router.post("/logout")

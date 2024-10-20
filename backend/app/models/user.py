@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from datetime import datetime
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -20,6 +21,8 @@ class UserResponse(BaseModel):
     id: str
     credits: float
     email_verified: bool
+    created_at: datetime
+    terms_accepted: bool
 
 class UserAddCredits(BaseModel):
     amount: float
@@ -27,3 +30,6 @@ class UserAddCredits(BaseModel):
 
 class GoogleLogin(BaseModel):
     token: str
+
+class UserAcceptTerms(BaseModel):
+    accept: bool

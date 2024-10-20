@@ -43,7 +43,9 @@ def create_user_response(user: dict) -> dict:
         username=user["username"],
         id=str(user["_id"]),
         credits=user.get("credits", 0),
-        email_verified=user.get("email_verified", False)
+        email_verified=user.get("email_verified", False),
+        created_at=user.get("created_at", datetime.utcnow()),
+        terms_accepted=user.get("terms_accepted", False)
     )
     access_token = create_access_token(data={"sub": user["email"]})
     return {
