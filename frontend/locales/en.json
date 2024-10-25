@@ -12,5 +12,8 @@
   "username": "Username",
   "registrationFailed": "Registration failed. Please try again.",
   "alreadyHaveAccount": "Already have an account? Sign in",
-  "loading": "Loading..."
+  "loading": "Loading...",
+  "resetLinkSent": "Password reset email sent. Please check your email.",
+  "resetLinkError": "Failed to send password reset email. Please try again.",
+  "logout": "Logout"
 }

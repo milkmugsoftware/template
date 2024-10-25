@@ -1,47 +1,62 @@
 import { createTheme } from '@mui/material';
-import { common, green, grey, lightBlue, red } from '@mui/material/colors';
+import { grey, green, red } from '@mui/material/colors';
 import { alpha } from '@mui/material/styles';
 import { shadThemeShadows } from './shadows';
 
-const darkBackground = alpha(common.black, 0.6);
-const darkBodyBackground = alpha(common.black, 0.8);
-const lightBackground = alpha(common.white, 0.8);
-const lightBodyBackground = alpha(common.white, 0.9);
+const customColors = {
+  primary: grey,
+  secondary: grey,
+  success: green,
+  error: red,
+  background: {
+    dark: '#1A1A1A',
+    light: '#F5F5F5',
+  },
+  text: {
+    dark: "#F0F0F0",
+    light: '#333333',
+  },
+};
+
+const darkBackground = alpha(customColors.background.dark, 0.9);
+const darkBodyBackground = alpha(customColors.background.dark, 0.95);
+const lightBackground = alpha(customColors.background.light, 0.9);
+const lightBodyBackground = alpha(customColors.background.light, 0.95);
 
 export const MainTheme = (mode: 'light' | 'dark') => {
-  const isDarkMode = mode === 'light';
+  const LightMode = mode === 'light';
 
   return createTheme({
     palette: {
       mode,
       primary: {
-        dark: isDarkMode ? alpha(grey[200], 0.8) : lightBlue[700],
-        main: isDarkMode ? alpha(common.white, 0.8) : lightBlue[500],
-        light: isDarkMode ? alpha(grey[800], 0.8) : lightBlue[300],
+        dark: LightMode ? customColors.primary[300] : customColors.primary[700],
+        main: LightMode ? customColors.primary[200] : customColors.primary[500],
+        light: LightMode ? customColors.primary[100] : customColors.primary[300],
       },
       secondary: {
-        main: isDarkMode ? alpha(grey[100], 0.8) : grey[700],
+        main: LightMode ? customColors.secondary[300] : customColors.secondary[700],
       },
       success: {
-        main: isDarkMode ? alpha(green[900], 0.8) : green[600],
+        main: LightMode ? customColors.success[400] : customColors.success[600],
       },
       error: {
-        main: isDarkMode ? alpha(red[900], 0.8) : red[600],
+        main: LightMode ? customColors.error[400] : customColors.error[600],
       },
       info: {
-        main: isDarkMode ? alpha(lightBlue[900], 0.8) : lightBlue[600],
+        main: LightMode ? customColors.primary[400] : customColors.primary[600],
       },
       warning: {
-        main: isDarkMode ? alpha(lightBlue[900], 0.8) : lightBlue[600],
+        main: LightMode ? customColors.primary[400] : customColors.primary[600],
       },
-      divider: isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6),
+      divider: LightMode ? alpha(customColors.primary[200], 0.2) : alpha(customColors.primary[700], 0.2),
       background: {
-        default: isDarkMode ? darkBackground : lightBackground,
-        paper: isDarkMode ? darkBackground : lightBackground,
+        default: LightMode ? darkBackground : lightBackground,
+        paper: LightMode ? darkBackground : lightBackground,
       },
       text: {
-        primary: isDarkMode ? common.white : common.black,
-        secondary: isDarkMode ? alpha(common.white, 0.7) : alpha(common.black, 0.7),
+        primary: LightMode ? customColors.text.dark : customColors.text.light,
+        secondary: LightMode ? alpha(customColors.text.dark, 0.7) : alpha(customColors.text.light, 0.7),
       },
     },
     shape: {
@@ -96,14 +111,14 @@ export const MainTheme = (mode: 'light' | 'dark') => {
       MuiCssBaseline: {
         styleOverrides: {
           ':root': {
-            colorScheme: isDarkMode ? 'dark' : 'light',
+            colorScheme: LightMode ? 'dark' : 'light',
           },
           html: {
             minHeight: '100%',
           },
           body: {
             minHeight: '100%',
-            backgroundColor: isDarkMode ? darkBodyBackground : lightBodyBackground,
+            backgroundColor: LightMode ? darkBodyBackground : lightBodyBackground,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'top right',
             backgroundSize: '100%',
@@ -124,18 +139,17 @@ export const MainTheme = (mode: 'light' | 'dark') => {
       MuiInputBase: {
         styleOverrides: {
           root: {
-            backgroundColor: isDarkMode ? alpha(common.black, 0.6) : alpha(common.white, 0.8),
-            color: isDarkMode ? common.white : common.black,
+            backgroundColor: LightMode ? alpha(customColors.background.dark, 0.6) : alpha(customColors.background.light, 0.8),
+            color: LightMode ? customColors.text.dark : customColors.text.light,
             '&::placeholder': {
-              color: isDarkMode ? alpha(common.white, 0.5) : alpha(common.black, 0.5),
+              color: LightMode ? alpha(customColors.text.dark, 0.5) : alpha(customColors.text.light, 0.5),
             },
             backdropFilter: 'blur(10px)',
-            border: `1px solid ${isDarkMode ? alpha(common.white, 0.23) : alpha(common.black, 0.23)}`,
+            border: `1px solid ${LightMode ? alpha(customColors.primary[200], 0.23) : alpha(customColors.primary[700], 0.23)}`,
             borderRadius: 12,
             '&:hover': {
-              border: `1px solid ${isDarkMode ? alpha(common.white, 0.5) : alpha(common.black, 0.5)}`,
+              border: `1px solid ${LightMode ? alpha(customColors.primary[200], 0.5) : alpha(customColors.primary[700], 0.5)}`,
             },
-
           },
         },
       },
@@ -153,12 +167,12 @@ export const MainTheme = (mode: 'light' | 'dark') => {
             textTransform: 'none',
             boxShadow: 'none',
             backdropFilter: 'blur(10px)',
-            color: isDarkMode ? common.white : common.black,
-            backgroundColor: isDarkMode ? alpha(common.white, 0.1) : alpha(common.black, 0.1),
-            border: `1px solid ${isDarkMode ? alpha(common.white, 0.23) : alpha(common.black, 0.23)}`,
+            color: LightMode ? customColors.text.dark : customColors.text.light,
+            backgroundColor: LightMode ? alpha(customColors.primary[700], 0.1) : alpha(customColors.primary[200], 0.1),
+            border: `1px solid ${LightMode ? alpha(customColors.primary[200], 0.23) : alpha(customColors.primary[700], 0.23)}`,
             '&:hover': {
-              backgroundColor: isDarkMode ? alpha(common.white, 0.2) : alpha(common.black, 0.2),
-              border: `1px solid ${isDarkMode ? alpha(common.white, 0.5) : alpha(common.black, 0.5)}`,
+              backgroundColor: LightMode ? alpha(customColors.primary[700], 0.2) : alpha(customColors.primary[200], 0.2),
+              border: `1px solid ${LightMode ? alpha(customColors.primary[200], 0.5) : alpha(customColors.primary[700], 0.5)}`,
             },
           },
           sizeSmall: {
@@ -177,17 +191,17 @@ export const MainTheme = (mode: 'light' | 'dark') => {
           root: {
             boxShadow: 'none',
             border: 0,
-            borderBottom: `1px solid ${isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6)}`,
+            borderBottom: `1px solid ${LightMode ? alpha(customColors.primary[200], 0.2) : alpha(customColors.primary[700], 0.2)}`,
             backdropFilter: 'blur(10px)',
-            backgroundColor: isDarkMode ? alpha(darkBackground, 0.6) : alpha(lightBackground, 0.8),
+            backgroundColor: LightMode ? alpha(darkBackground, 0.8) : alpha(lightBackground, 0.8),
           },
         },
       },
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: isDarkMode ? alpha(darkBackground, 0.6) : alpha(lightBackground, 0.8),
-            border: `1px solid ${isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6)}`,
+            backgroundColor: LightMode ? alpha(darkBackground, 0.8) : alpha(lightBackground, 0.8),
+            border: `1px solid ${LightMode ? alpha(customColors.primary[200], 0.2) : alpha(customColors.primary[700], 0.2)}`,
             backdropFilter: 'blur(10px)',
           },
         },
@@ -197,8 +211,8 @@ export const MainTheme = (mode: 'light' | 'dark') => {
           root: {
             backgroundImage: 'none',
             backdropFilter: 'blur(10px)',
-            backgroundColor: isDarkMode ? alpha('#090909', 0.6) : alpha(common.white, 0.8),
-            border: `1px solid ${isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6)}`,
+            backgroundColor: LightMode ? alpha(darkBackground, 0.8) : alpha(lightBackground, 0.8),
+            border: `1px solid ${LightMode ? alpha(customColors.primary[200], 0.2) : alpha(customColors.primary[700], 0.2)}`,
           },
         },
       },
@@ -207,15 +221,15 @@ export const MainTheme = (mode: 'light' | 'dark') => {
           root: {
             backgroundImage: 'none',
             backdropFilter: 'blur(10px)',
-            backgroundColor: isDarkMode ? alpha('#090909', 0.6) : alpha(common.white, 0.8),
-            border: `1px solid ${isDarkMode ? alpha(grey[800], 0.6) : alpha(grey[300], 0.6)}`,
+            backgroundColor: LightMode ? alpha(darkBackground, 0.8) : alpha(lightBackground, 0.8),
+            border: `1px solid ${LightMode ? alpha(customColors.primary[200], 0.2) : alpha(customColors.primary[700], 0.2)}`,
           },
         },
       },
       MuiLink: {
         styleOverrides: {
           root: {
-            color: isDarkMode ? lightBlue[300] : lightBlue[700],
+            color: LightMode ? customColors.primary[300] : customColors.primary[700],
           },
         },
       },
