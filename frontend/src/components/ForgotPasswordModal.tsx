@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, Paper } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, Paper, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 
@@ -35,76 +36,89 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ open, onClose
       onClose={onClose}
       aria-labelledby="forgot-password-title"
       aria-describedby="forgot-password-description"
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        p: { xs: 2, sm: 3 },
+        overflowY: 'auto',
+        height: '100%',
+      }}
     >
       <Box
+        component={Paper}
+        elevation={3}
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
           width: '100%',
-          height: '100%',
+          maxWidth: 'sm',
+          p: { xs: 2, sm: 3 },
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(5px)',
+          flexDirection: 'column',
+          gap: 2,
+          my: 'auto',
+          position: 'relative',
         }}
       >
-        <Paper
-          elevation={3}
+        <IconButton
+          onClick={onClose}
+          color="error"
+          size="small"
           sx={{
-            p: 4,
-            borderRadius: 2,
-            maxWidth: 400,
-            width: '100%',
+            position: 'absolute',
+            right: 8,
+            top: 8,
           }}
         >
-          <Typography id="forgot-password-title" variant="h6" component="h2" gutterBottom>
-            {t('resetPassword')}
-          </Typography>
-          <Typography id="forgot-password-description" variant="body2" gutterBottom>
-            {t('enterEmailForReset')}
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label={t('emailAddress')}
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {message && (
-              <Typography 
-                color={isError ? 'error' : 'success'} 
-                variant="body2" 
-                sx={{ mt: 1 }}
-              >
-                {message}
-              </Typography>
-            )}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+          <CloseIcon fontSize="small" />
+        </IconButton>
+
+        <Typography id="forgot-password-title" variant="h6" component="h2">
+          {t('resetPassword')}
+        </Typography>
+        
+        <Typography id="forgot-password-description" variant="body2">
+          {t('enterEmailForReset')}
+        </Typography>
+        
+        <Box 
+          component="form" 
+          onSubmit={handleSubmit} 
+          noValidate 
+          sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          <TextField
+            required
+            fullWidth
+            id="email"
+            label={t('emailAddress')}
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          
+          {message && (
+            <Typography 
+              color={isError ? 'error' : 'success'} 
+              variant="body2"
             >
-              {t('sendResetLink')}
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={onClose}
-              sx={{ mt: 1 }}
-            >
-              {t('close')}
-            </Button>
-          </Box>
-        </Paper>
+              {message}
+            </Typography>
+          )}
+          
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+          >
+            {t('sendResetLink')}
+          </Button>
+        </Box>
       </Box>
     </Modal>
   );
