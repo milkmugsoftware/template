@@ -33,3 +33,12 @@ class GoogleLogin(BaseModel):
 
 class UserAcceptTerms(BaseModel):
     accept: bool
+
+class TokenRefresh(BaseModel):
+    refresh_token: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    data: UserResponse

@@ -1,18 +1,26 @@
 from urllib.parse import unquote_plus
 import asyncio
-from datetime import datetime
-
+from datetime import datetime, timedelta
+import jwt
 from bson import ObjectId
-from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, JWT_SECRET, JWT_ALGORITHM
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
-from fastapi.responses import JSONResponse, RedirectResponse
-from models.user import GoogleLogin, UserChangePassword, UserCreate, UserLogin, UserAcceptTerms
+from fastapi.responses import JSONResponse, RedirectResponse, Response
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from models.user import (
+    GoogleLogin, UserChangePassword, UserCreate,
+    UserLogin, UserAcceptTerms, TokenRefresh
+)
 from utils.google_auth import get_google_auth_url, get_google_token, verify_google_token
-from utils.security import create_user_response, get_current_user, get_password_hash, verify_password
+from utils.security import (
+    create_user_response, get_current_user, get_password_hash,
+    verify_password, invalidate_session, verify_token, set_auth_cookies, clear_auth_cookies
+)
 from utils.email_utils import send_verification_email, create_verification_token, verify_email_token
 
 router = APIRouter()
+security = HTTPBearer()
 
 async def send_email_async(to_email: str, token: str):
     loop = asyncio.get_event_loop()
@@ -44,14 +52,73 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
     return create_user_response(new_user)
 
 @router.post("/login")
-async def login(user: UserLogin):
+async def login(response: Response, user: UserLogin):
     db = get_db()
     db_user = db.users.find_one({"email": user.email})
     if not db_user or not verify_password(user.password, db_user["password"]):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     if not db_user.get("email_verified", False):
         raise HTTPException(status_code=403, detail="Email not verified")
-    return create_user_response(db_user)
+
+    user_response = create_user_response(db_user)
+    set_auth_cookies(response, user_response["access_token"], user_response["refresh_token"])
+
+    return {"data": user_response["data"]}
+
+@router.post("/refresh")
+async def refresh_token(response: Response, request: Request):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="No refresh token")
+
+    try:
+        payload = verify_token(refresh_token, "refresh")
+        user_id = payload.get("user_id")
+        invalidate_id = payload.get("invalidate_id")
+
+        db = get_db()
+        user = db.users.find_one({"_id": ObjectId(user_id)})
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        access_token = jwt.encode(
+            {
+                "user_id": str(user["_id"]),
+                "sub": user["email"],
+                "exp": datetime.utcnow() + timedelta(hours=1),
+                "type": "access",
+                "invalidate_id": invalidate_id
+            },
+            JWT_SECRET,
+            algorithm=JWT_ALGORITHM
+        )
+
+        set_auth_cookies(response, access_token, refresh_token)
+        return {"message": "Token refreshed successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+@router.post("/logout")
+async def logout(response: Response, request: Request):
+    # Get the access token from cookies
+    access_token = request.cookies.get("access_token")
+    if access_token:
+        try:
+            # Decode token to get invalidate_id
+            payload = jwt.decode(access_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            invalidate_id = payload.get("invalidate_id")
+
+            # Invalidate the session
+            if invalidate_id:
+                invalidate_session(invalidate_id)
+        except jwt.InvalidTokenError:
+            # If token is invalid, we still want to clear cookies
+            pass
+
+    # Clear auth cookies
+    clear_auth_cookies(response)
+    return {"message": "Logged out successfully"}
 
 @router.get("/verify-email")
 async def verify_email(token: str):
@@ -120,7 +187,8 @@ async def google_auth_callback(request: Request):
                 "email": idinfo["email"],
                 "username": idinfo.get("name", idinfo["email"].split("@")[0]),
                 "google_id": idinfo["sub"],
-                "credits": 0
+                "credits": 0,
+                "email_verified": True  # Google emails are pre-verified
             }
             result = db.users.insert_one(new_user)
             new_user["_id"] = result.inserted_id
@@ -132,7 +200,6 @@ async def google_auth_callback(request: Request):
         return create_user_response(user)
 
     except Exception as e:
-        # Log the error for debugging
         print(f"Error in google_auth_callback: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error processing Google callback: {str(e)}")
 
@@ -160,9 +227,3 @@ async def get_user_info(current_user: str = Depends(get_current_user)):
         "email_verified": user.get("email_verified", False),
         "terms_accepted": user.get("terms_accepted", False)
     }
-
-@router.post("/logout")
-async def logout():
-    response = JSONResponse(content={"message": "Logged out successfully"})
-    response.delete_cookie(key="access_token")
-    return response
