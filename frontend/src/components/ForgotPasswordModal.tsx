@@ -1,19 +1,8 @@
 import React, { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { Modal, Box, Typography, TextField, Button, Paper, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
-
-const ModalContainer = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  backgroundColor: theme.palette.background.paper,
-  boxShadow: theme.shadows[24],
-  padding: theme.spacing(4),
-  borderRadius: theme.shape.borderRadius,
-}));
+import axios from 'axios';
 
 interface ForgotPasswordModalProps {
   open: boolean;
@@ -22,27 +11,86 @@ interface ForgotPasswordModalProps {
 
 const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ open, onClose }) => {
   const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
   const { t } = useTranslation();
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // TODO: Implement password reset logic here
-    console.log('Password reset requested for:', email);
-    onClose();
+    setMessage('');
+    setIsError(false);
+
+    try {
+      await axios.post('/api/auth/reset-password', { email });
+      setMessage(t('resetLinkSent'));
+    } catch (error) {
+      setIsError(true);
+      setMessage(t('resetLinkError'));
+      console.error('Password reset error:', error);
+    }
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <ModalContainer>
-        <Typography variant="h6" component="h2" gutterBottom>
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="forgot-password-title"
+      aria-describedby="forgot-password-description"
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        p: { xs: 2, sm: 3 },
+        overflowY: 'auto',
+        height: '100%',
+      }}
+    >
+      <Box
+        component={Paper}
+        elevation={3}
+        sx={{
+          width: '100%',
+          maxWidth: 'sm',
+          p: { xs: 2, sm: 3 },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          my: 'auto',
+          position: 'relative',
+        }}
+      >
+        <IconButton
+          onClick={onClose}
+          color="error"
+          size="small"
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+          }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+
+        <Typography id="forgot-password-title" variant="h6" component="h2">
           {t('resetPassword')}
         </Typography>
-        <Typography variant="body2" gutterBottom>
+        
+        <Typography id="forgot-password-description" variant="body2">
           {t('enterEmailForReset')}
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        
+        <Box 
+          component="form" 
+          onSubmit={handleSubmit} 
+          noValidate 
+          sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
           <TextField
-            margin="normal"
             required
             fullWidth
             id="email"
@@ -53,19 +101,27 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ open, onClose
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          
+          {message && (
+            <Typography 
+              color={isError ? 'error' : 'success'} 
+              variant="body2"
+            >
+              {message}
+            </Typography>
+          )}
+          
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
           >
             {t('sendResetLink')}
           </Button>
         </Box>
-      </ModalContainer>
+      </Box>
     </Modal>
   );
 };
 
 export default ForgotPasswordModal;
-

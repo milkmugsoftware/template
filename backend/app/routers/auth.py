@@ -3,7 +3,7 @@ import asyncio
 from datetime import datetime, timedelta
 import jwt
 from bson import ObjectId
-from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, JWT_SECRET, JWT_ALGORITHM
+from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, JWT_SECRET, JWT_ALGORITHM, FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from fastapi.responses import JSONResponse, RedirectResponse, Response
@@ -18,6 +18,7 @@ from utils.security import (
     verify_password, invalidate_session, verify_token, set_auth_cookies, clear_auth_cookies
 )
 from utils.email_utils import send_verification_email, create_verification_token, verify_email_token
+from utils.facebook_auth import get_facebook_auth_url, get_facebook_token, get_facebook_user_info
 
 router = APIRouter()
 security = HTTPBearer()
@@ -227,3 +228,54 @@ async def get_user_info(current_user: str = Depends(get_current_user)):
         "email_verified": user.get("email_verified", False),
         "terms_accepted": user.get("terms_accepted", False)
     }
+
+@router.post("/logout")
+async def logout():
+    response = JSONResponse(content={"message": "Logged out successfully"})
+    response.delete_cookie(key="access_token")
+    return response
+
+@router.get("/login/facebook")
+async def login_facebook(request: Request):
+    """Initiate Facebook Sign-In process"""
+    redirect_uri = str(request.url_for('facebook_auth_callback'))
+    return RedirectResponse(get_facebook_auth_url(redirect_uri))
+
+@router.get("/login/facebook/callback")
+async def facebook_auth_callback(request: Request):
+    """Handle Facebook Sign-In callback"""
+    try:
+        params = dict(request.query_params)
+        if 'code' not in params:
+            raise HTTPException(status_code=400, detail="Missing authorization code")
+
+        redirect_uri = str(request.url_for('facebook_auth_callback'))
+        access_token = get_facebook_token(params['code'], redirect_uri)
+        user_info = get_facebook_user_info(access_token)
+
+        db = get_db()
+        user = db.users.find_one({"email": user_info["email"]})
+
+        if not user:
+            new_user = {
+                "email": user_info["email"],
+                "username": user_info.get("name", user_info["email"].split("@")[0]),
+                "facebook_id": user_info["id"],
+                "credits": 0,
+                "email_verified": True,
+                "created_at": datetime.utcnow(),
+            }
+            result = db.users.insert_one(new_user)
+            new_user["_id"] = result.inserted_id
+            user = new_user
+        elif "facebook_id" not in user:
+            db.users.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"facebook_id": user_info["id"]}}
+            )
+
+        return create_user_response(user)
+
+    except Exception as e:
+        print(f"Error in facebook_auth_callback: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error processing Facebook callback: {str(e)}")

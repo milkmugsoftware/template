@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
+import SocialLoginButtons from '../components/SocialLoginButtons';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -35,70 +36,115 @@ const Login = () => {
   };
 
   return (
-    <Paper
-      elevation={3}
+    <Box
       sx={{
-        padding: 4,
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        maxWidth: 400,
-        margin: 'auto',
-        marginTop: 8,
+        minHeight: '100vh',
+        width: '100%',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        px: { xs: 2, sm: 3 },
+        py: { xs: 2, sm: 4 },
       }}
     >
-      <Typography component="h1" variant="h5">
-        {t('signIn')}
-      </Typography>
-      <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1, width: '100%' }}>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          label={t('emailAddress')}
-          name="email"
-          autoComplete="email"
-          autoFocus
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label={t('password')}
-          type="password"
-          id="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && (
-          <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-            {error}
-          </Typography>
-        )}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-        >
+      <Box
+        component={Paper}
+        elevation={3}
+        sx={{
+          width: '100%',
+          maxWidth: 'sm',
+          p: { xs: 2, sm: 3 },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+        }}
+      >
+        <Typography component="h1" variant="h5" align="center">
           {t('signIn')}
-        </Button>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <Link component="button" variant="body2" onClick={handleOpenModal}>
-            {t('forgotPassword')}
-          </Link>
-          <Link component={RouterLink} to="/register" variant="body2">
-            {t('dontHaveAccount')}
-          </Link>
+        </Typography>
+        
+        <Box 
+          component="form" 
+          onSubmit={handleLogin} 
+          noValidate 
+          sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          <TextField
+            required
+            fullWidth
+            id="email"
+            label={t('emailAddress')}
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <TextField
+            required
+            fullWidth
+            name="password"
+            label={t('password')}
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && (
+            <Typography color="error" variant="body2">
+              {error}
+            </Typography>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              height: 46,
+              fontWeight: 600,
+            }}
+          >
+            {t('signIn')}
+          </Button>
+
+          <SocialLoginButtons />
+
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 1, sm: 2 },
+              alignItems: { xs: 'stretch', sm: 'center' },
+              mt: 1,
+            }}
+          >
+            <Link 
+              component="button" 
+              variant="body2" 
+              onClick={handleOpenModal}
+              sx={{ textAlign: { xs: 'center', sm: 'left' } }}
+            >
+              {t('forgotPassword')}
+            </Link>
+            <Link 
+              component={RouterLink} 
+              to="/register" 
+              variant="body2"
+              sx={{ textAlign: { xs: 'center', sm: 'right' } }}
+            >
+              {t('dontHaveAccount')}
+            </Link>
+          </Box>
         </Box>
       </Box>
       <ForgotPasswordModal open={isModalOpen} onClose={handleCloseModal} />
-    </Paper>
+    </Box>
   );
 };
 

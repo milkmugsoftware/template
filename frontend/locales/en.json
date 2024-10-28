@@ -12,5 +12,16 @@
   "username": "Username",
   "registrationFailed": "Registration failed. Please try again.",
   "alreadyHaveAccount": "Already have an account? Sign in",
-  "loading": "Loading..."
+  "loading": "Loading...",
+  "resetLinkSent": "Password reset email sent. Please check your email.",
+  "resetLinkError": "Failed to send password reset email. Please try again.",
+  "logout": "Logout",
+  "orContinueWith": "Or continue with",
+  "continueWithGoogle": "Continue with Google",
+  "continueWithFacebook": "Continue with Facebook",
+  "registrationSuccess": "Registration successful! Redirecting...",
+  "emailAlreadyRegistered": "ThSis email is already registered",
+  "invalidEmail": "Please enter a valid email address",
+  "passwordTooShort": "Password must be at least 8 characters long",
+  "usernameTooShort": "Username must be at least 3 characters long"
 }

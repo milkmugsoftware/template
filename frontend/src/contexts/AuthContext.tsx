@@ -11,6 +11,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWithSocial: (provider: string, token: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -46,6 +47,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithSocial = async (provider: string, token: string) => {
+    try {
+      const response = await axios.post(`/api/auth/login/${provider}`, { token });
+      setUser(response.data.data);
+    } catch (error) {
+      console.error(`${provider} login error:`, error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await axios.post('/api/auth/logout');
@@ -57,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, loginWithSocial, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
@@ -70,4 +81,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
