@@ -11,6 +11,8 @@ import TopBar from './components/TopBar';
 import { MainTheme } from './MainTheme';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useMediaQuery } from '@mui/material';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from './components/PageTransition';
 
 const LoadingFallback = () => {
   return (
@@ -49,19 +51,21 @@ function AppContent() {
       <Router>
         {user && <TopBar />}
         <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
-          </Routes>
+          <AnimatePresence mode="wait">
+            <Routes>
+              <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+              <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <PageTransition><Dashboard /></PageTransition>
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
+            </Routes>
+          </AnimatePresence>
         </Suspense>
       </Router>
     </ThemeProvider>
