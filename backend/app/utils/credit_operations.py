@@ -1,5 +1,6 @@
-from fastapi import HTTPException
 from database import get_db
+from fastapi import HTTPException
+
 
 def check_and_deduct_credits(user_email: str, required_credits: float):
     db = get_db()

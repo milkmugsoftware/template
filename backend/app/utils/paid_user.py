@@ -1,6 +1,8 @@
-from fastapi import HTTPException
-from database import get_db
 from datetime import datetime, timedelta
+
+from database import get_db
+from fastapi import HTTPException
+
 
 def get_paid_user(current_user: str, days: int):
     db = get_db()
@@ -9,7 +11,6 @@ def get_paid_user(current_user: str, days: int):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Check for a payment within the last 'days' days
     recent_payment = db.payments.find_one({
         "user_id": user["_id"],
         "status": "approved",

@@ -1,9 +1,11 @@
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
-from fastapi import HTTPException
-from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
-import requests
 from urllib.parse import urlencode
+
+import requests
+from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+from fastapi import HTTPException
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
+
 
 def verify_google_token(token: str):
     try:

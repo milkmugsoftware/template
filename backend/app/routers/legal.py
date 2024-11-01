@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
-from utils.security import get_current_user
-from models.user import UserAcceptTerms
 from database import get_db
+from fastapi import APIRouter, Depends, HTTPException
+from models.user import UserAcceptTerms
+from utils.security import get_current_user
 
 router = APIRouter()
 

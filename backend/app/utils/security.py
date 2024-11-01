@@ -1,14 +1,15 @@
+import uuid
 from datetime import datetime, timedelta
+
 import jwt
+from bson import ObjectId
 from config import JWT_ALGORITHM, JWT_SECRET
+from database import get_db
 from fastapi import Depends, HTTPException, Request
+from fastapi.responses import Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from models.user import UserResponse
 from passlib.context import CryptContext
-from database import get_db
-from bson import ObjectId
-import uuid
-from fastapi.responses import Response
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -23,11 +24,9 @@ def get_password_hash(password):
 
 
 def create_session_tokens(user_id: str, email: str) -> tuple[str, str]:
-    # Generate a unique invalidate ID
     invalidate_id = str(uuid.uuid4())
     db = get_db()
 
-    # Create access token that expires in 1 hour
     access_expires = datetime.utcnow() + timedelta(hours=1)
     access_token = jwt.encode(
         {
@@ -41,7 +40,6 @@ def create_session_tokens(user_id: str, email: str) -> tuple[str, str]:
         algorithm=JWT_ALGORITHM
     )
 
-    # Create refresh token that expires in 30 days
     refresh_expires = datetime.utcnow() + timedelta(days=30)
     refresh_token = jwt.encode(
         {
@@ -54,7 +52,6 @@ def create_session_tokens(user_id: str, email: str) -> tuple[str, str]:
         algorithm=JWT_ALGORITHM
     )
 
-    # Store session in database
     db.sessions.insert_one({
         "invalidate_id": invalidate_id,
         "user_id": ObjectId(user_id),
@@ -70,17 +67,14 @@ def verify_token(token: str, token_type: str = "access"):
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
 
-        # Verify token type
         if payload.get("type") != token_type:
             raise HTTPException(status_code=401, detail="Invalid token type")
 
-        # Verify session exists
         db = get_db()
         session = db.sessions.find_one({"invalidate_id": payload.get("invalidate_id")})
         if not session:
             raise HTTPException(status_code=401, detail="Invalid session")
 
-        # Update last_used timestamp for the session
         db.sessions.update_one(
             {"invalidate_id": payload.get("invalidate_id")},
             {"$set": {"last_used": datetime.utcnow()}}
@@ -103,7 +97,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=True,  # Enable in production with HTTPS
+        secure=True,
         samesite="lax",
         max_age=3600  # 1 hour
     )
@@ -111,7 +105,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=True,  # Enable in production with HTTPS
+        secure=True,
         samesite="lax",
         max_age=2592000  # 30 days
     )
@@ -142,7 +136,6 @@ def create_user_response(user: dict) -> dict:
         terms_accepted=user.get("terms_accepted", False),
     )
 
-    # Create both access and refresh tokens
     access_token, refresh_token = create_session_tokens(str(user["_id"]), user["email"])
 
     return {

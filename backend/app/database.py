@@ -1,5 +1,5 @@
-from pymongo import MongoClient
 from config import MONGODB_URL, SOFTWARE_NAME
+from pymongo import MongoClient
 
 client = None
 db = None

@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field
 from decimal import Decimal
 from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class CardInfo(BaseModel):
     card_number: str

@@ -5,10 +5,17 @@ from typing import Optional
 
 import mercadopago
 from bson import ObjectId
-from config import MERCADO_PAGO_ACCESS_TOKEN, CREDIT_VALUE
+from config import CREDIT_VALUE, MERCADO_PAGO_ACCESS_TOKEN
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.payment import CardInfo, PaginatedPaymentResponse, PaymentCreate, PaymentResponse, PixPaymentCreate, PixPaymentResponse
+from models.payment import (
+    CardInfo,
+    PaginatedPaymentResponse,
+    PaymentCreate,
+    PaymentResponse,
+    PixPaymentCreate,
+    PixPaymentResponse,
+)
 from models.user import UserAddCredits
 from utils.security import get_current_user
 
@@ -53,7 +60,6 @@ async def create_payment(payment: PaymentCreate, card: Optional[CardInfo] = None
         if not card:
             raise HTTPException(status_code=400, detail="Card info is required for credit card payments")
 
-        # Create card token
         card_data = {
             "card_number": card.card_number,
             "expiration_month": card.expiration_month,
@@ -95,7 +101,6 @@ async def create_payment(payment: PaymentCreate, card: Optional[CardInfo] = None
         })
 
         if payment.payment_method == "credit_card" and payment_result["status"] == "approved":
-            # Add credits to user's account immediately for approved credit card payments
             credits_to_add = float(payment.amount) / CREDIT_VALUE
             db.users.update_one(
                 {"_id": user["_id"]},
@@ -196,22 +201,17 @@ async def get_payments(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Prepare the filter
     filter_query = {"user_id": ObjectId(user["_id"])}
     if payment_id:
         filter_query["payment_id"] = payment_id
 
-    # Get total count
     total = db.payments.count_documents(filter_query)
 
-    # Calculate pagination
     total_pages = ceil(total / size)
     skip = (page - 1) * size
 
-    # Fetch payments
     payments = db.payments.find(filter_query).skip(skip).limit(size)
 
-    # Prepare response
     items = [
         PaymentResponse(
             id=str(payment["payment_id"]),
@@ -239,26 +239,3 @@ async def get_user_credits(current_user: str = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"credits": user.get("credits", 0)}
-
-# @router.post("/add_credits")
-# async def add_credits(credits_data: UserAddCredits, current_user: str = Depends(get_current_user)):
-#     db = get_db()
-#     user = db.users.find_one({"email": current_user})
-
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-
-#     payment_amount = credits_data.amount * CREDIT_VALUE
-
-#     if credits_data.payment_method == "credit_card":
-#         # Implement credit card payment logic
-#         # This should create a payment and immediately add credits if approved
-#         pass
-#     elif credits_data.payment_method == "pix":
-#         # Implement Pix payment logic
-#         # This should create a Pix payment, but not add credits until confirmed via webhook
-#         pass
-#     else:
-#         raise HTTPException(status_code=400, detail="Invalid payment method")
-
-#     return {"message": f"Payment of {payment_amount} created for {credits_data.amount} credits"}

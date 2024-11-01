@@ -1,24 +1,34 @@
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from config import SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, EMAIL_FROM, SOFTWARE_NAME, BASE_URL, COMPANY_NAME
-import jwt
-from datetime import datetime, timedelta
-from config import JWT_SECRET, JWT_ALGORITHM
 import os
+import smtplib
+from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from string import Template
+
+import jwt
+from config import (
+    BASE_URL,
+    COMPANY_NAME,
+    EMAIL_FROM,
+    JWT_ALGORITHM,
+    JWT_SECRET,
+    SMTP_PASSWORD,
+    SMTP_PORT,
+    SMTP_SERVER,
+    SMTP_USERNAME,
+    SOFTWARE_NAME,
+)
+
 
 def send_verification_email(to_email: str, token: str):
     subject = f"Verify your email for {SOFTWARE_NAME}"
     verification_link = f"{BASE_URL}/auth/verify-email?token={token}"
 
-    # Read the HTML template
     current_dir = os.path.dirname(os.path.abspath(__file__))
     template_path = os.path.join(current_dir, '..', 'templates', 'email_verification_template.html')
     with open(template_path, 'r') as file:
         template = Template(file.read())
 
-    # Replace placeholders in the template
     html_content = template.safe_substitute(
         software_name=SOFTWARE_NAME,
         company_name=COMPANY_NAME,

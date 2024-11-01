@@ -1,6 +1,7 @@
-from fastapi import HTTPException
 import requests
 from config import FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET
+from fastapi import HTTPException
+
 
 def get_facebook_auth_url(redirect_uri: str):
     """Generate Facebook OAuth 2.0 authorization URL"""

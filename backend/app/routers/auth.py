@@ -1,24 +1,35 @@
-from urllib.parse import unquote_plus
 import asyncio
 from datetime import datetime, timedelta
+from urllib.parse import unquote_plus
+
 import jwt
 from bson import ObjectId
-from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, JWT_SECRET, JWT_ALGORITHM, FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET
+from config import (
+    FACEBOOK_CLIENT_ID,
+    FACEBOOK_CLIENT_SECRET,
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    JWT_ALGORITHM,
+    JWT_SECRET,
+)
 from database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from models.user import (
-    GoogleLogin, UserChangePassword, UserCreate,
-    UserLogin, UserAcceptTerms, TokenRefresh
-)
+from models.user import GoogleLogin, TokenRefresh, UserAcceptTerms, UserChangePassword, UserCreate, UserLogin
+from utils.email_utils import create_verification_token, send_verification_email, verify_email_token
+from utils.facebook_auth import get_facebook_auth_url, get_facebook_token, get_facebook_user_info
 from utils.google_auth import get_google_auth_url, get_google_token, verify_google_token
 from utils.security import (
-    create_user_response, get_current_user, get_password_hash,
-    verify_password, invalidate_session, verify_token, set_auth_cookies, clear_auth_cookies
+    clear_auth_cookies,
+    create_user_response,
+    get_current_user,
+    get_password_hash,
+    invalidate_session,
+    set_auth_cookies,
+    verify_password,
+    verify_token,
 )
-from utils.email_utils import send_verification_email, create_verification_token, verify_email_token
-from utils.facebook_auth import get_facebook_auth_url, get_facebook_token, get_facebook_user_info
 
 router = APIRouter()
 security = HTTPBearer()
@@ -46,7 +57,6 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
     result = db.users.insert_one(new_user)
     new_user["_id"] = result.inserted_id
 
-    # Create and send verification email asynchronously
     verification_token = create_verification_token(user.email)
     background_tasks.add_task(send_email_async, user.email, verification_token)
 
@@ -102,22 +112,17 @@ async def refresh_token(response: Response, request: Request):
 
 @router.post("/logout")
 async def logout(response: Response, request: Request):
-    # Get the access token from cookies
     access_token = request.cookies.get("access_token")
     if access_token:
         try:
-            # Decode token to get invalidate_id
             payload = jwt.decode(access_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
             invalidate_id = payload.get("invalidate_id")
 
-            # Invalidate the session
             if invalidate_id:
                 invalidate_session(invalidate_id)
         except jwt.InvalidTokenError:
-            # If token is invalid, we still want to clear cookies
             pass
 
-    # Clear auth cookies
     clear_auth_cookies(response)
     return {"message": "Logged out successfully"}
 
@@ -162,28 +167,21 @@ async def login_google(request: Request):
 async def google_auth_callback(request: Request):
     """Handle Google Sign-In callback"""
     try:
-        # Get all query parameters
         params = dict(request.query_params)
 
-        # Ensure required parameters are present
         if 'code' not in params:
             raise HTTPException(status_code=400, detail="Missing authorization code")
 
-        # Decode the URL-encoded code
         code = unquote_plus(params['code'])
-
         redirect_uri = str(request.url_for('google_auth_callback'))
 
         token = get_google_token(code, redirect_uri)
-
-        # Verify the token and get user info
         idinfo = verify_google_token(token)
 
         db = get_db()
         user = db.users.find_one({"email": idinfo["email"]})
 
         if not user:
-            # Create a new user if they don't exist
             new_user = {
                 "email": idinfo["email"],
                 "username": idinfo.get("name", idinfo["email"].split("@")[0]),
@@ -195,7 +193,6 @@ async def google_auth_callback(request: Request):
             new_user["_id"] = result.inserted_id
             user = new_user
         elif "google_id" not in user:
-            # Update existing user with Google ID if they haven't used Google login before
             db.users.update_one({"_id": user["_id"]}, {"$set": {"google_id": idinfo["sub"]}})
 
         return create_user_response(user)
