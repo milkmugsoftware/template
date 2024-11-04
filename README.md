@@ -1,6 +1,6 @@
-# Milk Mug SaaS Boilerplate
+# TemSaas
 
-Milk Mug is a powerful SaaS boilerplate that provides a solid foundation for building and launching your own Software-as-a-Service product. This boilerplate combines a robust FastAPI backend with a sleek React frontend, offering essential features like user authentication, payment processing, and credit-based access control.
+TemSaas is a powerful SaaS boilerplate that provides a solid foundation for building and launching your own Software-as-a-Service product. This boilerplate combines a robust FastAPI backend with a sleek React frontend, offering essential features like user authentication, payment processing, and credit-based access control.
 
 ## Features
 
@@ -39,20 +39,31 @@ Milk Mug is a powerful SaaS boilerplate that provides a solid foundation for bui
    ```
 3. Set up your `.env` file in the `backend` directory:
    ```
-   MONGODB_URL=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
-   SOFTWARE_NAME=your_software_name
-   COMPANY_NAME=your_company_name
-   MERCADO_PAGO_ACCESS_TOKEN=your_mercado_pago_access_token
-   MERCADO_PAGO_PUBLIC_KEY=your_mercado_pago_public_key
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
-   SMTP_SERVER=your_smtp_server
-   SMTP_PORT=your_smtp_port
-   SMTP_USERNAME=your_smtp_username
-   SMTP_PASSWORD=your_smtp_password
-   EMAIL_FROM=your_email_from_address
-   BASE_URL=your_frontend_base_url
+   MONGODB_URL = ''
+   JWT_SECRET = ''
+
+   SOFTWARE_NAME = ''
+   COMPANY_NAME = ''
+
+   PRICE = 1
+   STATEMENT_DESCRIPTOR = ''
+
+   MERCADO_PAGO_ACCESS_TOKEN = ''
+   MERCADO_PAGO_PUBLIC_KEY = ''
+
+   GOOGLE_CLIENT_ID = ''
+   GOOGLE_CLIENT_SECRET = ''
+
+   FACEBOOK_CLIENT_ID = ''
+   FACEBOOK_CLIENT_SECRET = ''
+
+   SMTP_SERVER = ''
+   SMTP_PORT = ''
+   SMTP_USERNAME = ''
+   SMTP_PASSWORD = ''
+   EMAIL_FROM = ''
+
+   BASE_URL = ''
    ```
 4. Run the backend server:
    ```
@@ -124,11 +135,3 @@ Access the API documentation at:
 3. Set up a production MongoDB instance
 4. Configure environment variables on your hosting platform
 5. Deploy the frontend build to a static hosting service (e.g., Netlify, Vercel)
-
-## Support
-
-For any questions or issues, please contact our support team at support@milkmug.com.
-
-## License
-
-This is a commercial product. Please refer to the license agreement provided with your purchase for terms of use.
