@@ -276,3 +276,38 @@ async def facebook_auth_callback(request: Request):
     except Exception as e:
         print(f"Error in facebook_auth_callback: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error processing Facebook callback: {str(e)}")
+
+@router.post("/forgot-password")
+async def forgot_password(email: str, background_tasks: BackgroundTasks):
+    db = get_db()
+    user = db.users.find_one({"email": email})
+    if not user:
+        return {"message": "This email is not registered"}
+    reset_token = create_verification_token(email)
+    background_tasks.add_task(send_email_async, email, reset_token)
+    return {"message": "If the email exists, a reset link will be sent"}
+
+@router.post("/reset-password")
+async def reset_password(request: Request):
+    data = await request.json()
+    token = data.get("token")
+    new_password = data.get("new_password")
+    
+    if not token or not new_password:
+        raise HTTPException(status_code=400, detail="Missing token or new password")
+        
+    email = verify_email_token(token)
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    db = get_db()
+    hashed_password = get_password_hash(new_password)
+    result = db.users.update_one(
+        {"email": email},
+        {"$set": {"password": hashed_password}}
+    )
+
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"message": "Password reset successfully"}

@@ -13,7 +13,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useMediaQuery } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from './components/PageTransition';
-
+import Profile from './pages/Profile';
+import ResetPassword from './pages/ResetPassword';
 const LoadingFallback = () => {
   return (
     <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
@@ -55,6 +56,8 @@ function AppContent() {
             <Routes>
               <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
               <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+              <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+              <Route path="/profile" element={<Profile />} />
               <Route
                 path="/dashboard"
                 element={
@@ -63,7 +66,6 @@ function AppContent() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
             </Routes>
           </AnimatePresence>
         </Suspense>

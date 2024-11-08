@@ -21,7 +21,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ open, onClose
     setIsError(false);
 
     try {
-      await axios.post('/api/auth/reset-password', { email });
+      await axios.post(`/api/auth/forgot-password?email=${encodeURIComponent(email)}`);
       setMessage(t('resetLinkSent'));
     } catch (error) {
       setIsError(true);

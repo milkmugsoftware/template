@@ -6,7 +6,7 @@ import uvicorn
 from config import SOFTWARE_NAME
 from database import close_db, get_db, init_db
 from fastapi import BackgroundTasks, FastAPI
-from routers import auth, legal, payment, protected
+from routers import auth, legal, payment, protected, profile
 
 
 @asynccontextmanager
@@ -41,6 +41,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(payment.router, prefix="/payment", tags=["Payment"])
 app.include_router(protected.router, prefix="/test", tags=["Test (Restricted Routes)"])
 app.include_router(legal.router, prefix="/legal", tags=["Legal"])
+app.include_router(profile.router, prefix="/user", tags=["User Profile"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

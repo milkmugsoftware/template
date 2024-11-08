@@ -134,6 +134,7 @@ def create_user_response(user: dict) -> dict:
         email_verified=user.get("email_verified", False),
         created_at=user.get("created_at", datetime.utcnow()),
         terms_accepted=user.get("terms_accepted", False),
+        profile=user.get("profile")
     )
 
     access_token, refresh_token = create_session_tokens(str(user["_id"]), user["email"])

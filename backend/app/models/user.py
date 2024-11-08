@@ -1,8 +1,6 @@
 from datetime import datetime
-from typing import Optional
-
-from pydantic import BaseModel, EmailStr
-
+from typing import List, Optional
+from pydantic import BaseModel, EmailStr, HttpUrl
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -44,3 +42,40 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     data: UserResponse
+
+class Project(BaseModel):
+    title: str
+    description: str
+
+class Experience(BaseModel):
+    company: str
+    years: float
+
+class Certificate(BaseModel):
+    title: str
+    link: HttpUrl
+    completion_date: datetime
+
+class UserProfile(BaseModel):
+    bio: Optional[str]
+    personal_website: Optional[HttpUrl]
+    linkedin: Optional[HttpUrl]
+    years_of_experience: Optional[float]
+    skills: Optional[List[str]]
+    projects: Optional[List[Project]]
+    experiences: Optional[List[Experience]]
+    timezone: Optional[str]
+    education: Optional[List[str]]
+    certificates: Optional[List[Certificate]]
+    availability: Optional[str]
+    pfp_url: Optional[HttpUrl]
+
+class UserResponse(BaseModel):
+    email: EmailStr
+    username: str
+    id: str
+    credits: int
+    email_verified: bool
+    created_at: datetime
+    terms_accepted: bool
+    profile: Optional[UserProfile]

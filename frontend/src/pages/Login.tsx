@@ -3,8 +3,8 @@ import { Box, TextField, Button, Typography, Paper, Link } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import ForgotPasswordModal from '../components/ForgotPasswordModal';
-import SocialLoginButtons from '../components/SocialLoginButtons';
+import ForgotPasswordModal from '../components/auth/ForgotPasswordModal';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 
 const Login = () => {
   const [email, setEmail] = useState('');

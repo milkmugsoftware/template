@@ -23,5 +23,11 @@
   "emailAlreadyRegistered": "ThSis email is already registered",
   "invalidEmail": "Please enter a valid email address",
   "passwordTooShort": "Password must be at least 8 characters long",
-  "usernameTooShort": "Username must be at least 3 characters long"
+  "usernameTooShort": "Username must be at least 3 characters long",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm Password",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "passwordResetSuccess": "Password reset successful! Redirecting to login...",
+  "passwordResetError": "Failed to reset password. Please try again.",
+  "invalidResetLink": "Invalid or expired reset link"
 }

@@ -1,36 +1,57 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Paper, Link } from '@mui/material';
-import axios from 'axios';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import SocialLoginButtons from '../components/auth/SocialLoginButtons';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 
-const Register = () => {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
+const ResetPassword = () => {
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login } = useAuth();
 
-  const handleRegister = async (event: React.FormEvent) => {
+  const token = searchParams.get('token');
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     setSuccess('');
+
+    if (password !== confirmPassword) {
+      setError(t('passwordsDoNotMatch'));
+      return;
+    }
+
+    if (password.length < 8) {
+      setError(t('passwordTooShort'));
+      return;
+    }
+
     try {
-      await axios.post('/api/auth/register', { email, username, password });
-      setSuccess(t('registrationSuccess'));
-      // Auto-login after successful registration
-      await login(email, password);
-      navigate('/dashboard');
+      await axios.post('/api/auth/reset-password', {
+        token,
+        new_password: password
+      });
+      setSuccess(t('passwordResetSuccess'));
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.detail || t('registrationFailed'));
-      console.error('Registration error:', err);
+      setError(err.response?.data?.detail || t('passwordResetError'));
+      console.error('Password reset error:', err);
     }
   };
+
+  if (!token) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography color="error">{t('invalidResetLink')}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -57,12 +78,12 @@ const Register = () => {
         }}
       >
         <Typography component="h1" variant="h5" align="center">
-          {t('signUp')}
+          {t('resetPassword')}
         </Typography>
         
         <Box 
           component="form" 
-          onSubmit={handleRegister} 
+          onSubmit={handleSubmit} 
           noValidate 
           sx={{ 
             display: 'flex',
@@ -73,34 +94,24 @@ const Register = () => {
           <TextField
             required
             fullWidth
-            id="email"
-            label={t('emailAddress')}
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            required
-            fullWidth
-            id="username"
-            label={t('username')}
-            name="username"
-            autoComplete="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <TextField
-            required
-            fullWidth
             name="password"
-            label={t('password')}
+            label={t('newPassword')}
             type="password"
             id="password"
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+          />
+          <TextField
+            required
+            fullWidth
+            name="confirmPassword"
+            label={t('confirmPassword')}
+            type="password"
+            id="confirmPassword"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
           {error && (
             <Typography color="error" variant="body2">
@@ -121,20 +132,12 @@ const Register = () => {
               fontWeight: 600,
             }}
           >
-            {t('signUp')}
+            {t('resetPassword')}
           </Button>
-
-          <SocialLoginButtons />
-
-          <Box sx={{ textAlign: 'center', mt: 1 }}>
-            <Link component={RouterLink} to="/login" variant="body2">
-              {t('alreadyHaveAccount')}
-            </Link>
-          </Box>
         </Box>
       </Box>
     </Box>
   );
 };
 
-export default Register;
+export default ResetPassword; 
